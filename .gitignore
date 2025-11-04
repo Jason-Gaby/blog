@@ -1,0 +1,9 @@
+*.sqlite3
+
+.env.production
+
+media/
+*/media/
+
+static/
+*/static/
