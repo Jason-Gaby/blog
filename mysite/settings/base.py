@@ -139,6 +139,7 @@ STATICFILES_FINDERS = [
 
 STATICFILES_DIRS = [
     os.path.join(PROJECT_DIR, "static"),
+    "C:\\Users\\jason\\OneDrive\\Personal Life\\Python Data\\jason_gaby_website\\static",
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
