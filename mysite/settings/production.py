@@ -1,48 +1,31 @@
-import os
-import random
-import string
-import dj_database_url
+from decouple import Config, RepositoryEnv
 
 from .base import *
 
+config = Config(RepositoryEnv(".env.production"))
+
 DEBUG = False
 
-DATABASES = {
-    "default": dj_database_url.config(
-        conn_max_age=600,
-        conn_health_checks=True
-    )
-}
+SECRET_KEY = config('SECRET_KEY')
 
-SECRET_KEY = os.environ["SECRET_KEY"]
+ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = config("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
 SECURE_SSL_REDIRECT = True
-
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
-
-CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-MIDDLEWARE.append("whitenoise.middleware.WhiteNoiseMiddleware")
-STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME")
+INSTALLED_APPS.append("storages")
+STORAGES["staticfiles"]["BACKEND"] = "storages.backends.s3boto3.S3Boto3Storage"
+STORAGES["default"]["BACKEND"] = "storages.backends.s3boto3.S3Boto3Storage"
+STATIC_URL = f'https://{config("AWS_STATIC_STORAGE_BUCKET_NAME")}.s3.{config("AWS_S3_REGION_NAME")}.amazonaws.com/static/'
+MEDIA_URL = f'https://{config("AWS_MEDIA_STORAGE_BUCKET_NAME")}.s3.{config("AWS_S3_REGION_NAME")}.amazonaws.com/static/'
 
-if "AWS_STORAGE_BUCKET_NAME" in os.environ:
-    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
-    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
-    AWS_S3_ACCESS_KEY_ID = os.getenv("AWS_S3_ACCESS_KEY_ID")
-    AWS_S3_SECRET_ACCESS_KEY = os.getenv("AWS_S3_SECRET_ACCESS_KEY")
-
-    INSTALLED_APPS.append("storages")
-
-    STORAGES["default"]["BACKEND"] = "storages.backends.s3boto3.S3Boto3Storage"
-
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
 
 LOGGING = {
     "version": 1,
@@ -61,6 +44,18 @@ LOGGING = {
 }
 
 WAGTAIL_REDIRECTS_FILE_STORAGE = "cache"
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': config('DB_HOST'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'PORT': config('DB_PORT'),
+    }
+}
 
 try:
     from .local import *
