@@ -13,6 +13,11 @@ DATABASES = {
     }
 }
 
+STATICFILES_DIRS = [
+    os.path.join(PROJECT_DIR, "static"),
+    "C:\\Users\\jason\\OneDrive\\Personal Life\\Python Data\\jason_gaby_website\\static",
+]
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-v%12k_2hq!um5)_$#pdy473gyu0*5v*g3s%d0etqcg(e5)%t80"
 
