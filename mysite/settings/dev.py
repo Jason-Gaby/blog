@@ -13,6 +13,24 @@ DATABASES = {
     }
 }
 
+
+# Default storage settings
+# See https://docs.djangoproject.com/en/5.2/ref/settings/#std-setting-STORAGES
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_URL = "/static/"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
+
 STATICFILES_DIRS = [
     os.path.join(PROJECT_DIR, "static"),
     "C:\\Users\\jason\\OneDrive\\Personal Life\\Python Data\\jason_gaby_website\\static",

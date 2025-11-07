@@ -19,10 +19,18 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME")
 INSTALLED_APPS.append("storages")
-STORAGES["staticfiles"]["BACKEND"] = "storages.backends.s3boto3.S3Boto3Storage"
-STORAGES["default"]["BACKEND"] = "storages.backends.s3boto3.S3Boto3Storage"
-STATIC_URL = f'https://{config("AWS_STATIC_STORAGE_BUCKET_NAME")}.s3.{config("AWS_S3_REGION_NAME")}.amazonaws.com/static/'
-MEDIA_URL = f'https://{config("AWS_MEDIA_STORAGE_BUCKET_NAME")}.s3.{config("AWS_S3_REGION_NAME")}.amazonaws.com/media/'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "mysite.storage.PublicMediaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "mysite.storage.StaticStorage",
+    },
+}
+
+STATIC_URL = f'https://{config("AWS_STATIC_STORAGE_BUCKET_NAME")}.s3.amazonaws.com/static/'
+MEDIA_URL = f'https://{config("AWS_MEDIA_STORAGE_BUCKET_NAME")}.s3.amazonaws.com/media/'
 
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
