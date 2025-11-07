@@ -43,9 +43,9 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),  # Adjust level for production (e.g., INFO, WARNING, ERROR)
+            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),  # Adjust level for production (e.g., INFO, WARNING, ERROR)
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "verbose",
         },
         "file": {
                     "level": "DEBUG",  # You can keep DEBUG for detailed file logs
