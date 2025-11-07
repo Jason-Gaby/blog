@@ -58,7 +58,7 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["file"],
+            "handlers": ["console", "file"],
             "propagate": True,
         },
     },
