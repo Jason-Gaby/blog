@@ -48,8 +48,7 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file", "mail_admins"],
-            "level": "INFO",  # Django's general logging level
+            "handlers": ["console", "file"],
             "propagate": True,
         },
     },
