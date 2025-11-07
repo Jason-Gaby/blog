@@ -16,16 +16,16 @@ ENV PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=mysite.settings.production
 
 # Install system packages required by Wagtail and Django.
-RUN dnf update -y && dnf install -y \
-    python3.13 \
-    gcc \
-    mariadb-devel \
-    postgresql-devel \
-    libjpeg-turbo-devel \
-    zlib-devel \
-    libwebp-devel \
- && dnf clean all \
- && rm -rf /var/cache/dnf
+RUN apt-get update --yes --quiet && apt-get install --yes --quiet --no-install-recommends \
+    # The 'python3.13' package is not needed here; it's provided by the base image
+    # 'gcc' is included in 'build-essential'
+    build-essential \
+    libpq-dev \
+    libmariadb-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libwebp-dev \
+ && rm -rf /var/lib/apt/lists/*
 
 # Install the application server.
 RUN pip install "gunicorn>=23.0.0"
