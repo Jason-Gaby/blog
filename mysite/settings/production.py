@@ -61,7 +61,7 @@ LOGGING = {
         "file": {
                     "level": "DEBUG",  # You can keep DEBUG for detailed file logs
                     "class": "logging.handlers.RotatingFileHandler",
-                    "filename": "/app/logs/debug.log",  # Specify production log file path
+                    "filename": "/home/ec2-user/logs/debug.log",  # Specify production log file path
                     "maxBytes": 1024 * 1024 * 5,  # 5 MB
                     "backupCount": 5,  # Keep 5 backup files
                     "formatter": "verbose",
