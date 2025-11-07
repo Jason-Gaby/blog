@@ -1,4 +1,5 @@
 from decouple import Config, RepositoryEnv
+import os
 
 from .base import *
 
@@ -32,13 +33,24 @@ LOGGING = {
     "disable_existing_loggers": False,
     "handlers": {
         "console": {
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),  # Adjust level for production (e.g., INFO, WARNING, ERROR)
             "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
+        "file": {
+                    "level": "DEBUG",  # You can keep DEBUG for detailed file logs
+                    "class": "logging.handlers.RotatingFileHandler",
+                    "filename": "/var/log/django/debug.log",  # Specify production log file path
+                    "maxBytes": 1024 * 1024 * 5,  # 5 MB
+                    "backupCount": 5,  # Keep 5 backup files
+                    "formatter": "verbose",
+                },
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "handlers": ["console", "file", "mail_admins"],
+            "level": "INFO",  # Django's general logging level
+            "propagate": True,
         },
     },
 }
