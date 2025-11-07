@@ -31,12 +31,22 @@ AWS_S3_OBJECT_PARAMETERS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
-        # "console": {
-        #     "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),  # Adjust level for production (e.g., INFO, WARNING, ERROR)
-        #     "class": "logging.StreamHandler",
-        #     "formatter": "simple",
-        # },
+        "console": {
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),  # Adjust level for production (e.g., INFO, WARNING, ERROR)
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
         "file": {
                     "level": "DEBUG",  # You can keep DEBUG for detailed file logs
                     "class": "logging.handlers.RotatingFileHandler",
