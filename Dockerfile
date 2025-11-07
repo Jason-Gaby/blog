@@ -1,6 +1,3 @@
-# Use an official Python runtime as parent image
-FROM rockylinux/python:3.13
-
 # Add user that will be used in the container.
 RUN useradd wagtail
 
@@ -17,6 +14,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 # Install system packages required by Wagtail and Django.
 RUN dnf update -y && dnf install -y \
+    python3.13 \
     gcc \
     mariadb-devel \
     postgresql-devel \
@@ -27,7 +25,7 @@ RUN dnf update -y && dnf install -y \
  && rm -rf /var/cache/dnf
 
 # Install the application server.
-RUN pip install "gunicorn==20.0.4"
+RUN pip install "gunicorn>=23.0.0"
 
 # Install the project requirements.
 COPY requirements.txt /
