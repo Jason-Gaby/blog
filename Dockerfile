@@ -1,3 +1,6 @@
+# Use the official Python 3.13 image (based on Debian)
+FROM python:3.13-slim-bookworm
+
 # Add user that will be used in the container.
 RUN useradd wagtail
 
