@@ -56,8 +56,3 @@ DATABASES = {
         'PORT': config('DB_PORT'),
     }
 }
-
-try:
-    from .local import *
-except ImportError:
-    pass
