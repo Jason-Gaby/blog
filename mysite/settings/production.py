@@ -29,8 +29,10 @@ STORAGES = {
     },
 }
 
-STATIC_URL = f'https://{config("AWS_STATIC_STORAGE_BUCKET_NAME")}.s3.amazonaws.com/static/'
-MEDIA_URL = f'https://{config("AWS_MEDIA_STORAGE_BUCKET_NAME")}.s3.amazonaws.com/media/'
+AWS_STATIC_STORAGE_BUCKET_NAME = config("AWS_STATIC_STORAGE_BUCKET_NAME")
+AWS_MEDIA_STORAGE_BUCKET_NAME = config("AWS_MEDIA_STORAGE_BUCKET_NAME")
+STATIC_URL = f'https://{AWS_STATIC_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
+MEDIA_URL = f'https://{AWS_MEDIA_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/'
 
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
