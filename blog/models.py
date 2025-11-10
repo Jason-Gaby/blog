@@ -34,8 +34,6 @@ class BlogTagIndexPage(Page):
         return context
 
 
-
-
 class BlogIndexPage(Page):
     intro = models.CharField(max_length=255)
     # add the get_context method:
@@ -47,6 +45,7 @@ class BlogIndexPage(Page):
         return context
 
     content_panels = Page.content_panels + ["intro"]
+
 
 class BlogPage(Page):
     date = models.DateField("Post Date", default=timezone.now)

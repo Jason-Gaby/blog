@@ -3,6 +3,7 @@
 *.sqlite3
 
 .env.production
+tailwindcss.exe
 
 media/
 */media/

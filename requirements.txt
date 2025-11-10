@@ -6,3 +6,4 @@ psycopg[binary]>=3.2.0
 dj-database-url>=3.0.0
 whitenoise>=6.11.0
 django-storages[s3]>=1.14.0
+django-widget-tweaks>=1.5.0

@@ -1,15 +1,37 @@
 {% extends "base.html" %}
 {% load wagtailcore_tags %}
+{% load widget_tweaks %}
 
 {% block body_class %}template-formpage{% endblock %}
 
 {% block content %}
-    <h1>{{ page.title }}</h1>
-    <div>{{ page.intro|richtext }}</div>
+    <div class="border rounded-lg px-8 py-6 mx-auto my-8 max-w-2xl">
+    <h1 class="text-2xl font-medium mb-4">{{ page.title }}</h1>
+    <div class="mx-auto my-8">{{ page.intro|richtext }}</div>
+        <form class="page-form" action="{% pageurl page %}" method="POST">
+            {% csrf_token %}
 
-    <form class="page-form" action="{% pageurl page %}" method="POST">
-        {% csrf_token %}
-        {{ form.as_div }}
-        <button type="Submit">Submit</button>
-    </form>
+            {% for field in form %}
+            <div class="field-wrapper">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium">
+                    {{ field.label }}
+                </label>
+
+
+                {{ field | add_class:"border rounded-sm" }}
+
+                {% for error in field.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div>
+                <button type="Submit" class="bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600">Submit</button>
+            </div>
+        </form>
+    </div>
+
 {% endblock content %}
+
+
