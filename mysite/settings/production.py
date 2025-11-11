@@ -29,6 +29,9 @@ STORAGES = {
     },
 }
 
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+]
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
