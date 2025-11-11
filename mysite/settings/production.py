@@ -30,7 +30,7 @@ STORAGES = {
 }
 
 STATICFILES_FINDERS = [
-    "mysite.storage.NonRecursiveFileSystemFinder",
+    "django.contrib.staticfiles.finders.FileSystemFinder",
 ]
 
 STATICFILES_DIRS = [
