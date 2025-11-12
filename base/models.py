@@ -1,8 +1,6 @@
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
-from honeypot.decorators import check_honeypot
-
 #from django import forms
 from wagtail.forms import forms
 from django.db import models

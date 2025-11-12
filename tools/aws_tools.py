@@ -210,8 +210,8 @@ def _format_size(bytes):
 if __name__ == "__main__":
     config = Config(RepositoryEnv(".env.dev"))
 
-    #buckets = [config('AWS_STATIC_STORAGE_BUCKET_NAME'), config('AWS_MEDIA_STORAGE_BUCKET_NAME')]
-    buckets = [config('AWS_MEDIA_STORAGE_BUCKET_NAME')]
+    buckets = [config('AWS_STATIC_STORAGE_BUCKET_NAME'), config('AWS_MEDIA_STORAGE_BUCKET_NAME')]
+    #buckets = [config('AWS_MEDIA_STORAGE_BUCKET_NAME')]
 
     for bucket_name in buckets:
         print(f"\n========================================")

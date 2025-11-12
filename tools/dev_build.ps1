@@ -68,9 +68,9 @@ try {
 Write-Host ""
 
 # Step 4: Load fixture
-Write-Host "[Step 4/4] Loading fixture from downloads/data.json..." -ForegroundColor Yellow
+Write-Host "[Step 4/4] Loading fixture from downloads/dev_data.json..." -ForegroundColor Yellow
 
-$fixturePath = ".\downloads\data.json"
+$fixturePath = ".\downloads\dev_data.json"
 
 if (-not (Test-Path $fixturePath)) {
     Write-Host "✗ Fixture file not found: $fixturePath" -ForegroundColor Red
