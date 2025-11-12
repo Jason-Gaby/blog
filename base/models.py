@@ -98,6 +98,26 @@ class FormPage(AbstractEmailForm):
 
         return form_class
 
+    def get_data_for_submission(self, form):
+        """
+        Returns the submission data as a dictionary, explicitly excluding
+        the anti-spam fields (captcha and honeypot) from the email and log.
+        """
+        super().get_data_fields()
+        data = super().get_data_for_submission(form)
+
+        # Define fields to exclude from email/log
+        fields_to_exclude = ['email_check', 'captcha']
+
+        # Filter out the unwanted fields
+        filtered_data = {
+            name: value
+            for name, value in data.items()
+            if name not in fields_to_exclude
+        }
+
+        return filtered_data
+
     def process_form_submission(self, form):
         # Check honeypot - if filled, it's a bot (silent rejection)
         if form.cleaned_data.get('email_check'):
@@ -106,6 +126,36 @@ class FormPage(AbstractEmailForm):
 
         # If honeypot is empty and reCAPTCHA passed, process normally
         return super().process_form_submission(form)
+
+    def send_mail(self, form):
+        """
+        Overrides the base send_mail method to temporarily filter fields
+        and use the parent class's email generation logic.
+        """
+        # Define fields to exclude from the email body
+        fields_to_exclude = ['email_check', 'captcha']
+
+        # 1. Store the original form fields
+        original_fields = form.fields
+
+        # 2. Filter the fields dictionary
+        filtered_fields = {
+            name: field
+            for name, field in original_fields.items()
+            if name not in fields_to_exclude
+        }
+
+        # 3. Temporarily replace the form's fields with the filtered list
+        # This is what AbstractEmailForm will iterate over to build the email body
+        form.fields = filtered_fields
+
+        try:
+            # 4. Call the original AbstractEmailForm.send_mail method
+            super().send_mail(form)
+        finally:
+            # 5. Restore the original form fields, regardless of success or failure
+            # This ensures the form object remains intact for other uses.
+            form.fields = original_fields
 
 
 @register_snippet
