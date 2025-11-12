@@ -82,7 +82,7 @@ class FormPage(AbstractEmailForm):
         # Honeypot
         form_class.base_fields['email_check'] = forms.CharField(
             required=False,
-            label='Website',  # Looks legitimate to bots
+            label='',  # Looks legitimate to bots
             widget=forms.TextInput(attrs={
                 'style': 'position:absolute;left:-9999px;width:1px;height:1px',
                 'tabindex': '-1',
@@ -93,7 +93,7 @@ class FormPage(AbstractEmailForm):
 
         # reCAPTCHA
         form_class.base_fields['captcha'] = ReCaptchaField(
-            widget=ReCaptchaV2Checkbox()
+            widget=ReCaptchaV2Checkbox(),
         )
 
         return form_class
