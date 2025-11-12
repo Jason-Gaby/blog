@@ -1,4 +1,7 @@
 from .base import *
+from decouple import Config, RepositoryEnv
+
+config = Config(RepositoryEnv(".env.dev"))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -35,12 +38,11 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    #"django.contrib.staticfiles.finders.AppDirectoriesFinder", This code searchs in all ./*/static/* files, omit for now.
 ]
 
 STATICFILES_DIRS = [
     os.path.join(PROJECT_DIR, "static"),
-    "C:\\Users\\jason\\OneDrive\\Personal Life\\Python Data\\jason_gaby_website\\static",
 ]
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -50,6 +52,12 @@ SECRET_KEY = "django-insecure-v%12k_2hq!um5)_$#pdy473gyu0*5v*g3s%d0etqcg(e5)%t80
 ALLOWED_HOSTS = ["*"]
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
+# reCAPTCHA Configuration
+# Get keys from https://www.google.com/recaptcha/admin
+RECAPTCHA_PUBLIC_KEY = config('CAPTCHA_V2_SITE_KEY')
+RECAPTCHA_PRIVATE_KEY = config('CAPTCHA_V2_SECRET_KEY')
 
 
 try:

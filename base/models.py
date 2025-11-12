@@ -1,3 +1,10 @@
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
+
+from honeypot.decorators import check_honeypot
+
+#from django import forms
+from wagtail.forms import forms
 from django.db import models
 from modelcluster.fields import ParentalKey
 
@@ -19,6 +26,8 @@ from wagtail.models import (
     RevisionMixin,
     TranslatableMixin
 )
+
+
 
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.contrib.forms.panels import FormSubmissionsPanel
@@ -68,6 +77,38 @@ class FormPage(AbstractEmailForm):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+    def get_form_class(self):
+        form_class = super().get_form_class()
+
+        # Honeypot
+        form_class.base_fields['email_check'] = forms.CharField(
+            required=False,
+            label='Website',  # Looks legitimate to bots
+            widget=forms.TextInput(attrs={
+                'style': 'position:absolute;left:-9999px;width:1px;height:1px',
+                'tabindex': '-1',
+                'autocomplete': 'off',
+                'aria-hidden': 'true'
+            })
+        )
+
+        # reCAPTCHA
+        form_class.base_fields['captcha'] = ReCaptchaField(
+            widget=ReCaptchaV2Checkbox()
+        )
+
+        return form_class
+
+    def process_form_submission(self, form):
+        # Check honeypot - if filled, it's a bot (silent rejection)
+        if form.cleaned_data.get('email_check'):
+            # Don't save submission, don't send email, don't show error
+            return None
+
+        # If honeypot is empty and reCAPTCHA passed, process normally
+        return super().process_form_submission(form)
+
 
 @register_snippet
 class FooterText(

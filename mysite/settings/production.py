@@ -96,3 +96,9 @@ DATABASES = {
         'PORT': config('DB_PORT'),
     }
 }
+
+
+# reCAPTCHA Configuration
+# Get keys from https://www.google.com/recaptcha/admin
+RECAPTCHA_PUBLIC_KEY = config('CAPTCHA_V2_SITE_KEY')
+RECAPTCHA_PRIVATE_KEY = config('CAPTCHA_V2_SECRET_KEY')
