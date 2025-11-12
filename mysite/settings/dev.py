@@ -38,7 +38,7 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
-    #"django.contrib.staticfiles.finders.AppDirectoriesFinder", This code searchs in all ./*/static/* files, omit for now.
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder", #This code searchs in all ./*/static/* files, omit for now.
 ]
 
 STATICFILES_DIRS = [
