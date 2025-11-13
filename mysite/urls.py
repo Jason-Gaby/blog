@@ -7,11 +7,14 @@ from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
+from base.views import CustomLoginView, CustomLogoutView
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
+    path("login/", CustomLoginView.as_view(), name="login"),
+    path("logout/", CustomLogoutView.as_view(), name="logout"),
     path("search/", search_views.search, name="search"),
 ]
 

@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "portfolio",
     "home",
     "search",
+    "users",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.settings",
@@ -89,6 +90,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "mysite.wsgi.application"
 
+
+# User settings
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -106,6 +109,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTH_USER_MODEL = "users.User"
 
 
 # Internationalization
