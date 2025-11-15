@@ -1,3 +1,5 @@
+from django_recaptcha.fields import ReCaptchaField
+from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from django import forms
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
@@ -7,6 +9,27 @@ from django.contrib.auth.forms import UserCreationForm
 User = get_user_model()
 
 class UserRegisterForm(UserCreationForm):
+    # Honeypot
+    profile_check = forms.CharField(
+        required=False,
+        label='',  # Looks legitimate to bots
+        widget=forms.TextInput(attrs={
+            'style': 'position:absolute;left:-9999px;width:1px;height:1px',
+            'tabindex': '-1',
+            'autocomplete': 'off',
+            'aria-hidden': 'true'
+        })
+    )
+
+    # reCAPTCHA
+    captcha = ReCaptchaField(
+        widget=ReCaptchaV2Checkbox(
+            attrs={
+                'data-size': 'compact',  # Makes the widget smaller
+            }
+        ),
+    )
+
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
@@ -20,7 +43,7 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         # Define the fields the user can update.
         # NEVER include 'password' here.
-        fields = ('first_name', 'last_name', 'email', 'profile_picture')
+        fields = ('first_name', 'last_name', 'email', 'profile_picture', 'is_subscribed_to_updates')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,3 +64,5 @@ def profile_update_view(request):
         form = UserUpdateForm(instance=request.user)
 
     return render(request, 'users/profile.html', {'form': form})
+
+

@@ -8,3 +8,9 @@ class User(AbstractUser):
         blank=True,
         null=True
     )
+
+    is_subscribed_to_updates = models.BooleanField(
+        default=True,
+        verbose_name="Subscribe to Email Updates",
+        help_text="Check this box to receive periodic updates and newsletters."
+    )

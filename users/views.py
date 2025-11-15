@@ -15,7 +15,7 @@ from .forms import UserUpdateForm, UserRegisterForm
 User = get_user_model()
 
 class CustomLoginView(LoginView):
-    template_name = "users/login.html"
+    template_name = "registrations/login.html"
 
     next_page = settings.LOGIN_REDIRECT_URL
 
@@ -112,7 +112,7 @@ class CustomProfileView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
 class CustomPasswordChangeView(PasswordChangeView):
-    template_name = "users/password_change.html"
+    template_name = "registrations/password_change.html"
     success_url = reverse_lazy('profile')
 
     # Override form_valid to add a message before redirecting
@@ -127,25 +127,25 @@ class CustomPasswordChangeView(PasswordChangeView):
         return response
 
 class CustomPasswordResetView(PasswordResetView):
-    template_name = "users/password_reset_form.html"
-    email_template_name = 'users/password_reset_email.html'
-    html_email_template_name = 'users/password_reset_email.html'
+    template_name = "registrations/password_reset_form.html"
+    email_template_name = 'registrations/password_reset_email.html'
+    html_email_template_name = 'registrations/password_reset_email.html'
 
     success_url = reverse_lazy('password_reset_done')
 
 class CustomPasswordResetDoneView(PasswordResetDoneView):
-    template_name = "users/password_reset_done.html"
+    template_name = "registrations/password_reset_done.html"
 
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
-    template_name = "users/password_reset_confirm.html"
+    template_name = "registrations/password_reset_confirm.html"
     success_url = reverse_lazy('password_reset_complete')
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
-    template_name = "users/password_reset_complete.html"
+    template_name = "registrations/password_reset_complete.html"
 
 class CustomUserRegisterView(FormView, SuccessMessageMixin):
-    template_name = "users/register.html"
+    template_name = "registrations/register.html"
     form_class = UserRegisterForm
     success_url = reverse_lazy('login')
 

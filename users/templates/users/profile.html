@@ -69,7 +69,7 @@
                     <h3 class="text-xl mb-4">Account Settings</h3>
                     {# Render each form field #}
                     {% for field in form %}
-                        {% if field != form.profile_picture %}
+                        {% if field != form.profile_picture and "subscribe" not in field.name|lower %}
                             <div class="form-control w-full">
                                 <label class="label">
                                     <span class="label-text">{{ field.label }}</span>
@@ -81,6 +81,24 @@
                                     <label class="label text-error text-xs">{{ error }}</label>
                                 {% endfor %}
                             </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# Subscription forms #}
+                    <h3 class="text-xl mb-4">Subscriptions</h3>
+                    {% for field in form  %}
+                        {% if "subscribe" in field.name|lower %}
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">{{ field.label }}</span>
+                            </label>
+                            {{ field | add_class:"border rounded-sm px-1" }}
+
+                            {# Display field errors #}
+                            {% for error in field.errors %}
+                                <label class="label text-error text-xs">{{ error }}</label>
+                            {% endfor %}
+                        </div>
                         {% endif %}
                     {% endfor %}
 

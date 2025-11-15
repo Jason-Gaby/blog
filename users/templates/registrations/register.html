@@ -26,6 +26,7 @@
 
                     <div class="max-w-56 mx-auto space-y-4">
                     {% for field in form %}
+                        {% if field.name != 'captcha' %}
                         <div class="form-control w-full">
                             <label class="label">
                                 <span class="label-text">{{ field.label }}</span>
@@ -34,16 +35,25 @@
                                 {{ field | add_class:"border rounded-sm px-2 w-full" }}
                             </div>
 
-
                             {# Display field errors #}
                             {% for error in field.errors %}
                                 <label class="label text-error text-xs">{{ error }}</label>
                             {% endfor %}
                         </div>
+                        {% endif %}
                     {% endfor %}
                     </div>
 
+                    <div class="flex justify-center w-full mx-2 my-2">
+                        {{ form.captcha  }}
+                        {% for error in form.captcha.errors %}
+                            <p class="text-error text-sm mt-2 text-center">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
                 </div>
+
+
 
                 <div class="card-actions justify-center mt-8">
                     <button type="submit" class="btn btn-primary w-40">Save Changes</button>
