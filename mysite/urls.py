@@ -8,7 +8,8 @@ from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
 from users.views import CustomLoginView, CustomProfileView, CustomPasswordChangeView, CustomPasswordResetView, \
-    CustomPasswordResetDoneView, CustomUserRegisterView, CustomLogoutView
+    CustomPasswordResetDoneView, CustomUserRegisterView, CustomLogoutView, CustomPasswordResetConfirmView, \
+    CustomPasswordResetCompleteView
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
@@ -20,6 +21,8 @@ urlpatterns = [
     path("account/password_change/", CustomPasswordChangeView.as_view(), name="password_change"),
     path("account/password_reset/", CustomPasswordResetView.as_view(), name="password_reset"),
     path("account/password_reset/done/", CustomPasswordResetDoneView.as_view(), name="password_reset_done"),
+    path('account/reset/<uidb64>/<token>/',  CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('account/reset/done/',  CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path("account/register/", CustomUserRegisterView.as_view(), name="register"),
     # This block includes paths like 'password_reset/', 'reset/done/', etc.
     path("account/", include(auth_urls)), # NOTE: THIS MUST BE AFTER CUSTOM VIEWS!
