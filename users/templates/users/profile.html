@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mx-auto mt-10 p-4 max-w-lg">
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h1 class="card-title text-3xl mb-6">Update Profile</h1>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {# DaisyUI Form Grid/Layout #}
+                <div class="space-y-4">
+                    
+                    {# Display non-field errors if any #}
+                    {% if form.non_field_errors %}
+                        <div role="alert" class="alert alert-error">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>{{ form.non_field_errors }}</span>
+                        </div>
+                    {% endif %}
+
+                    {# Render profile picture #}
+                    <div class="flex flex-col items-center form-control w-full p-4 sm:border sm:rounded-lg">
+                        <label class="label">
+                            <span class="label-text text-lg font-semibold">Profile Picture</span>
+                        </label>
+
+                        {# 1. Display Current Image (if one exists) #}
+                        <div class="mb-4 flex items-center mt-2">
+                            {% if form.instance.profile_picture %}
+                                {# The ImageField instance has a .url property pointing to the file #}
+                                <img src="{{ form.instance.profile_picture.url }}"
+                                     alt="Current Profile Picture"
+                                     class="mask mask-circle w-36 h-36 object-cover border-2">
+                            {% else %}
+                                <div class="mask mask-circle bg-gray-300 dark:bg-gray-600 w-24 h-24 flex items-center justify-center text-gray-600 dark:text-gray-300">
+                                    No Image
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.profile_picture.initial %}
+                            <div class="flex justify-between items-center space-x-2 text-sm mt-2">
+                                <span class="label-text-alt">
+                                    <a href="{{ form.instance.profile_picture.url }}" target="_blank" class="link link-primary">View Image</a>
+                                </span>
+
+                                <input type="checkbox" name="{{ form.profile_picture.name }}-clear" id="{{ form.profile_picture.id_for_label }}-clear_id">
+                                <label for="{{ form.profile_picture.id_for_label }}-clear_id">Delete Image</label>
+                            </div>
+                        {% endif %}
+
+                        <span class="mt-2">Update Image</span>
+                        <input
+                            type="file"
+                            name="{{ form.profile_picture.name }}"
+                            id="{{ form.profile_picture.id_for_label }}"
+                            class="file-input file-input-bordered w-62"
+                        />
+
+                        {# 4. Display field errors for profile_picture #}
+                        {% for error in form.profile_picture.errors %}
+                            <label class="label text-error text-xs">{{ error }}</label>
+                        {% endfor %}
+                    </div>
+
+                    <h3 class="text-xl mb-4">Account Settings</h3>
+                    {# Render each form field #}
+                    {% for field in form %}
+                        {% if field != form.profile_picture %}
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text">{{ field.label }}</span>
+                                </label>
+                                {{ field | add_class:"border rounded-sm px-1" }}
+
+                                {# Display field errors #}
+                                {% for error in field.errors %}
+                                    <label class="label text-error text-xs">{{ error }}</label>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+
+                    <h3 class="text-xl mb-4">Account Security</h3>
+                    <a href="{% url 'password_change' %}" class="btn btn-outline btn-primary">
+                        Change Password
+                    </a>
+
+                    {% if messages %}
+                    {% for message in messages %}
+                        {% if "password successfully changed" in message|lower %}
+                            <div role="alert" class="alert alert-success mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                    
+                </div>
+                
+                <div class="card-actions justify-end mt-8">
+                    <button type="submit" class="btn btn-primary w-full sm:w-auto">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

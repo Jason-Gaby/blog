@@ -3,7 +3,13 @@
 module.exports = {
   darkMode: 'media',
   content: [
-    './**/*.html', // Scans all your Django templates for utility classes
+    './base/templates/**/*.html', // Scans all your Django templates for utility classes
+    './blog/templates/**/*.html', // Scans all your Django templates for utility classes
+    './home/templates/**/*.html', // Scans all your Django templates for utility classes
+    './mysite/templates/**/*.html', // Scans all your Django templates for utility classes
+    './portfolio/templates/**/*.html', // Scans all your Django templates for utility classes
+    './search/templates/**/*.html', // Scans all your Django templates for utility classes
+    './users/templates/**/*.html', // Scans all your Django templates for utility classes
     '!./static/**/*.html',
     // Add other paths like './static/js/*.js' if needed
   ],
@@ -14,6 +20,6 @@ module.exports = {
   },
   // If you use plugins, they MUST be listed here
   plugins: [
-    // require('@tailwindcss/forms'),
+      require('daisyui'),
   ],
 };

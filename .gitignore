@@ -9,6 +9,7 @@ tailwindcss.exe
 
 downloads/
 uploads/
+node_modules/
 
 media/
 */media/

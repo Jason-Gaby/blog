@@ -1,21 +1,30 @@
 from django.conf import settings
 from django.urls import include, path
 from django.contrib import admin
-
+from django.contrib.auth import urls as auth_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
-from base.views import CustomLoginView, CustomLogoutView
+from users.views import CustomLoginView, CustomProfileView, CustomPasswordChangeView, CustomPasswordResetView, \
+    CustomPasswordResetDoneView, CustomUserRegisterView, CustomLogoutView
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
-    path("login/", CustomLoginView.as_view(), name="login"),
-    path("logout/", CustomLogoutView.as_view(), name="logout"),
+    path("account/login/", CustomLoginView.as_view(), name="login"),
+    path("account/logout/", CustomLogoutView.as_view(), name="logout"),
+    path("account/profile/", CustomProfileView.as_view(), name="profile"),
+    path("account/password_change/", CustomPasswordChangeView.as_view(), name="password_change"),
+    path("account/password_reset/", CustomPasswordResetView.as_view(), name="password_reset"),
+    path("account/password_reset/done/", CustomPasswordResetDoneView.as_view(), name="password_reset_done"),
+    path("account/register/", CustomUserRegisterView.as_view(), name="register"),
+    # This block includes paths like 'password_reset/', 'reset/done/', etc.
+    path("account/", include(auth_urls)), # NOTE: THIS MUST BE AFTER CUSTOM VIEWS!
     path("search/", search_views.search, name="search"),
+    path("", include(wagtail_urls)),
 ]
 
 

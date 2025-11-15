@@ -67,8 +67,20 @@ MIDDLEWARE = [
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 ]
 
+# URLS
 ROOT_URLCONF = "mysite.urls"
+LOGIN_REDIRECT_URL = 'site_root'
+SAFE_LOGOUT_REDIRECT = 'site_root'
 
+# List of URL names or path prefixes that require authentication
+PROTECTED_URL_PATHS = [
+    "/account/profile",
+    "/admin/"
+    # Add any other URL names that require login, e.g., 'dashboard'
+]
+
+
+# Templates
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -95,6 +107,11 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
+AUTHENTICATION_BACKENDS = [
+    # Allows users to login with email or username.
+    'mysite.auth_backends.EmailOrUsernameBackend',
+]
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -112,19 +129,21 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "users.User"
 
+# The default duration for a non-session-ending logout (e.g., 2 weeks in seconds)
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14 # 1,209,600 seconds (2 weeks)
+
+# Default setting: Session expires when the browser closes.
+# We override this in the view *only* if the user checks "remember me".
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
-
-
 
 # Django sets a maximum of 1000 fields per form by default, but particularly complex page models
 # can exceed this limit within Wagtail's page editor.
@@ -132,7 +151,6 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
 
 # Wagtail settings
-
 WAGTAIL_SITE_NAME = "mysite"
 
 # Search
