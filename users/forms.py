@@ -23,16 +23,12 @@ class UserRegisterForm(UserCreationForm):
 
     # reCAPTCHA
     captcha = ReCaptchaField(
-        widget=ReCaptchaV2Checkbox(
-            attrs={
-                'data-size': 'compact',  # Makes the widget smaller
-            }
-        ),
+        widget=ReCaptchaV2Checkbox(),
     )
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'is_subscribed_to_updates']
 
 class UserUpdateForm(forms.ModelForm):
     """

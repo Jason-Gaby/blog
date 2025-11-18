@@ -94,11 +94,7 @@ class FormPage(AbstractEmailForm):
 
         # reCAPTCHA
         form_class.base_fields['captcha'] = ReCaptchaField(
-            widget=ReCaptchaV2Checkbox(
-                attrs={
-                    'data-size': 'compact',  # Makes the widget smaller
-                }
-            ),
+            widget=ReCaptchaV2Checkbox(),
         )
 
         return form_class
