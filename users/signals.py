@@ -13,7 +13,7 @@ from wagtail_newsletter.models import NewsletterRecipients
 logger = logging.getLogger(__name__)
 
 # ⚠️ Define the NAME of the NewsletterRecipients object set up in the Wagtail Admin
-MAIN_RECIPIENT_NAME = "General Updates"
+MAIN_RECIPIENT_NAME = settings.NEWSLETTER_AUDIENCE_NAME
 
 
 @receiver(post_save, sender=User)

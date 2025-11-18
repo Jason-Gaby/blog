@@ -6,11 +6,22 @@ from django.views.generic.edit import FormView
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.conf import settings
+from django.db import IntegrityError
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy, reverse
 from django.urls.exceptions import NoReverseMatch
-
 from django.views.generic import UpdateView
-from .forms import UserUpdateForm, UserRegisterForm
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+
+import uuid
+
+from .forms import UserUpdateForm, UserRegisterForm, SubscribeForm
 
 User = get_user_model()
 
@@ -148,12 +159,110 @@ class CustomUserRegisterView(FormView, SuccessMessageMixin):
     template_name = "registrations/register.html"
     form_class = UserRegisterForm
     success_url = reverse_lazy('login')
+    success_message = "Account created! Please check your email for a link to set your password and log in."
 
     # Method called when the submitted form data is valid
     def form_valid(self, form):
         # 1. Save the new user object
-        form.save()
-
+        user = form.save()
+        send_account_creation_email(self.request, user)
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        return super().form_invalid(form)
 
+
+def subscribe_view(request):
+    url = None
+    if settings.HOME_URL == "site_root":
+        from wagtail.models import Site
+        site = Site.find_for_request(request)
+        if site:
+            url = site.root_page.url
+    else:
+        url = settings.HOME_URL
+
+    if request.method == 'POST':
+        form = SubscribeForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+
+            # 1. Attempt to find the user if they already exist
+            try:
+                user = User.objects.get(email=email)
+                messages.warning(request, "A user already exists with this email. Log in to your account to update your subscription settings.")
+                return redirect(url)
+
+            except User.DoesNotExist:
+                # 2. User does not exist, create a new account
+                try:
+                    # 💡 Auto-generate a unique username since it's required by AbstractUser.
+                    # We use a UUID to ensure global uniqueness.
+                    username_base = email.split('@')[0].lower()[:20]
+                    unique_id = uuid.uuid4().hex[:6]
+                    username = f"{username_base}_{unique_id}"
+
+                    # Note: We don't set a password here, making the account unusable for login.
+                    # The user will need to use a "Forgot Password" link to set one if they want to log in later.
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        is_subscribed_to_updates=True
+                    )
+
+                    send_account_creation_email(request, user)
+
+                    messages.success(request, "Subscription successful! Check your email for confirmation.")
+                    return redirect(url)
+
+                except IntegrityError as e:
+                    # Should only catch if the generated username was somehow not unique, though highly unlikely.
+                    messages.error(request, "A user already exists with that information. Please try again.")
+                    return redirect(url)
+                except Exception as e:
+                    messages.error(request, f"An unexpected error occurred during signup: {e}")
+                    return redirect(url)
+
+        else:
+            messages.error(request, "The email address provided is invalid.")
+            return redirect(url)
+
+    # Handle GET Requests
+    else:
+        form = SubscribeForm()
+        return render(request, 'includes/footer.html', {'form': form})
+
+
+def send_account_creation_email(request, user):
+    """
+    Sends an email to the new user containing a unique token for setting their password.
+    """
+    # 1. Generate secure reset tokens (uid and token)
+    context = {
+        'email': user.email,
+        'domain': request.get_host(),  # Gets the domain (e.g., example.com)
+        'site_name': getattr(settings, 'WAGTAIL_SITE_NAME'),
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'user': user,
+        'token': default_token_generator.make_token(user),
+        'protocol': 'https' if request.is_secure() else 'http',
+    }
+
+    # 2. Render the email content (HTML or plain text)
+    subject = f"Welcome to {context['site_name']}! Set up your account access."
+    email_html_content = render_to_string('registrations/account_creation_email.html', context)
+    email_plain_content = strip_tags(email_html_content)
+
+    # 3. Send the email
+    try:
+        send_mail(
+            subject,
+            email_plain_content,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+            html_message=email_html_content,
+        )
+    except Exception as e:
+        # Log the failure but allow the user subscription process to complete
+        print(f"Failed to send account creation email to {user.email}: {e}")

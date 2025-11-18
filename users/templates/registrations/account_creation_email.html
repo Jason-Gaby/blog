@@ -1,0 +1,16 @@
+<p>Hi {{ user.username|default:user.email }},</p>
+
+<p>Thank you for subscribing to {{ site_name }}. We've created an account for you so you can manage your subscription and settings on our site.</p>
+
+<p>Since this account was created without a password, please click the link below to set your password and gain access:</p>
+
+<p style="margin: 20px 0;">
+    <a href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}"
+       style="display: inline-block; padding: 10px 20px; color: #ffffff; background-color: #4c51bf; border-radius: 5px; text-decoration: none;">
+        Set Your Password
+    </a>
+</p>
+
+<p>This is a one-time link and is only valid for a limited time.</p>
+
+<p>Thanks,<br>{{ site_name }} Team</p>

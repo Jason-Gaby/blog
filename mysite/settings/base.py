@@ -76,6 +76,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = "mysite.urls"
 LOGIN_REDIRECT_URL = 'site_root'
 SAFE_LOGOUT_REDIRECT = 'site_root'
+HOME_URL = 'site_root'
 
 # List of URL names or path prefixes that require authentication
 PROTECTED_URL_PATHS = [
@@ -156,7 +157,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
 
 # Wagtail settings
-WAGTAIL_SITE_NAME = "mysite"
+WAGTAIL_SITE_NAME = base_config("WAGTAIL_SITE_NAME")
 
 # Search
 # https://docs.wagtail.org/en/stable/topics/search/backends.html
@@ -184,3 +185,6 @@ WAGTAIL_NEWSLETTER_MAILCHIMP_API_KEY= base_config("WAGTAIL_NEWSLETTER_MAILCHIMP_
 WAGTAIL_NEWSLETTER_FROM_NAME=base_config("WAGTAIL_NEWSLETTER_FROM_NAME")
 WAGTAIL_NEWSLETTER_REPLY_TO=base_config("WAGTAIL_NEWSLETTER_REPLY_TO")
 WAGTAIL_NEWSLETTER_CACHE_TIMEOUT = 300  # 5 minutes
+
+# Newsletter General Settings
+NEWSLETTER_AUDIENCE_NAME=base_config("NEWSLETTER_AUDIENCE_NAME")

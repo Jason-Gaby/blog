@@ -26,7 +26,7 @@
 
                     <div class="max-w-56 mx-auto space-y-4">
                     {% for field in form %}
-                        {% if field.name != 'captcha' %}
+                        {% if not field.name == 'captcha' and not field.name == 'password1' and not field.name == 'password2' %}
                         <div class="form-control w-full">
                             <label class="label">
                                 <span class="label-text">{{ field.label }}</span>
