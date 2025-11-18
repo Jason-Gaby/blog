@@ -111,6 +111,8 @@ EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool, default=True)  # Use EMAIL_PO
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool, default=False)  # EUse MAIL_PORT 465 for SSL
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
+# Newsletter Settings
+NEWSLETTER_SEGMENT_TAG="PRD"
 
 # Django admins and managers
 ADMIN_USER_NAME=config("ADMIN_USER_NAME", default="Admin user")

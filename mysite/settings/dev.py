@@ -59,6 +59,9 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 RECAPTCHA_PUBLIC_KEY = config('CAPTCHA_V2_SITE_KEY')
 RECAPTCHA_PRIVATE_KEY = config('CAPTCHA_V2_SECRET_KEY')
 
+# Newsletter Settings
+NEWSLETTER_SEGMENT_TAG="DEV"
+
 
 try:
     from .local import *

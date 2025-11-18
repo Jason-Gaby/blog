@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from decouple import Config, RepositoryEnv
+
+base_config = Config(RepositoryEnv(".env.base"))
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
@@ -30,6 +33,7 @@ INSTALLED_APPS = [
     "home",
     "search",
     "users",
+    "newsletter",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.settings",
@@ -42,6 +46,7 @@ INSTALLED_APPS = [
     "wagtail.search",
     "wagtail.admin",
     "wagtail",
+    "wagtail_newsletter",
     "modelcluster",
     "taggit",
     "django_filters",
@@ -172,4 +177,10 @@ WAGTAILADMIN_BASE_URL = "https://jag-economics.com"
 WAGTAILDOCS_EXTENSIONS = ['csv', 'docx', 'key', 'odt', 'pdf', 'pptx', 'rtf', 'txt', 'xlsx', 'zip']
 
 
-
+# Mailchimp for newsletter
+WAGTAIL_NEWSLETTER_RECIPIENTS_MODEL = "wagtail_newsletter.NewsletterRecipients"
+WAGTAIL_NEWSLETTER_CAMPAIGN_BACKEND = "wagtail_newsletter.campaign_backends.mailchimp.MailchimpCampaignBackend"
+WAGTAIL_NEWSLETTER_MAILCHIMP_API_KEY= base_config("WAGTAIL_NEWSLETTER_MAILCHIMP_API_KEY")
+WAGTAIL_NEWSLETTER_FROM_NAME=base_config("WAGTAIL_NEWSLETTER_FROM_NAME")
+WAGTAIL_NEWSLETTER_REPLY_TO=base_config("WAGTAIL_NEWSLETTER_REPLY_TO")
+WAGTAIL_NEWSLETTER_CACHE_TIMEOUT = 300  # 5 minutes
