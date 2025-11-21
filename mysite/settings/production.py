@@ -114,6 +114,10 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 # Newsletter Settings
 NEWSLETTER_SEGMENT_TAG="PRD"
 
+# Comment Settings
+COMMENTS_XTD_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+COMMENTS_XTD_CONTACT_EMAIL = config('EMAIL_CONTACT_USER')
+
 # Django admins and managers
 ADMIN_USER_NAME=config("ADMIN_USER_NAME", default="Admin user")
 ADMIN_USER_EMAIL=config("ADMIN_USER_EMAIL", default=None)

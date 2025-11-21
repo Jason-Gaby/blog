@@ -12,4 +12,5 @@ paramiko>=4.0.0
 django-recaptcha>=4.1.0
 wagtail_newsletter>=0.2.3
 mailchimp-marketing>=3.0.80
- mrml>=0.2.0
+mrml>=0.2.0
+django-comments-xtd>=2.10.1

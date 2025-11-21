@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load comments %}
+
+{# ⚡ JAVASCRIPT: Auto-submit the form as soon as the page loads #}
+{% block extra_js %}
+<script>
+    window.onload = function() {
+        // Find the form by its ID and submit it instantly
+        document.getElementById('finalSubmissionForm').submit();
+    };
+</script>
+{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; padding-top: 50px;">
+        <p>Processing your comment...</p>
+        <p>You will be redirected momentarily.</p>
+    </div>
+
+    {# 🟢 CRITICAL: This form contains all data needed for final submission. #}
+    <form action="{% url 'comments-post-redirect' %}" method="post" id="finalSubmissionForm">
+        {% csrf_token %}
+
+        {# Pass all visible fields (including the comment text) as hidden inputs #}
+        {% for field in form.visible_fields %}
+            <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:"" }}">
+        {% endfor %}
+
+        {# Pass all necessary hidden fields (timestamp, security_hash, object_pk, etc.) #}
+        {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+
+        {# Pass the next URL for the final redirect after saving #}
+        <input type="hidden" name="next" value="{{ next }}">
+    </form>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.contrib import admin
 from django.contrib.auth import urls as auth_urls
 from wagtail.admin import urls as wagtailadmin_urls
@@ -10,6 +10,7 @@ from search import views as search_views
 from users.views import CustomLoginView, CustomProfileView, CustomPasswordChangeView, CustomPasswordResetView, \
     CustomPasswordResetDoneView, CustomUserRegisterView, CustomLogoutView, CustomPasswordResetConfirmView, \
     CustomPasswordResetCompleteView, subscribe_view
+from blog.views import post_comment_redirect
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
@@ -28,6 +29,8 @@ urlpatterns = [
     path("account/", include(auth_urls)), # NOTE: THIS MUST BE AFTER CUSTOM VIEWS!
     path("search/", search_views.search, name="search"),
     path('subscribe/', subscribe_view, name='subscribe'),
+    path('comments/redirect/', post_comment_redirect, name='comments-post-redirect'),
+    re_path(r'comments/', include('django_comments_xtd.urls')),
     path("", include(wagtail_urls)),
 ]
 

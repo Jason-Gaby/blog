@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load comments_xtd %}
+
+{# ⚡ JAVASCRIPT: Auto-submit the form as soon as the page loads #}
+{% block extra_js %}
+<script>
+    window.onload = function() {
+        // Find the form by its ID and submit it instantly
+        document.getElementById('finalSubmissionForm').submit();
+    };
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="row justify-content-center">
+    <div style="text-align: center; padding-top: 50px;">
+            <p>Processing your comment...</p>
+            <p>You will be redirected momentarily.</p>
+    </div>
+
+  <div class="my-5">
+    <form action="." method="post" id="finalSubmissionForm">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ comment.get_absolute_url }}"/>
+      <div class="form-group">
+        <div class="text-center">
+          <input type="submit" name="action_type" class="btn btn-danger" value="{% trans "Flag" %}"/>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from decouple import Config, RepositoryEnv
@@ -29,6 +30,7 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 INSTALLED_APPS = [
     "base",
     "blog",
+    "core",
     "portfolio",
     "home",
     "search",
@@ -56,9 +58,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "widget_tweaks",
     "django_unused_media",
     "django_recaptcha",
+    "django_comments_xtd",
+    "django_comments",
 ]
 
 MIDDLEWARE = [
@@ -71,6 +76,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 ]
+
+# Required for Django Comments to work. Points to the root site ID.
+SITE_ID=2
 
 # URLS
 ROOT_URLCONF = "mysite.urls"
@@ -188,3 +196,22 @@ WAGTAIL_NEWSLETTER_CACHE_TIMEOUT = 300  # 5 minutes
 
 # Newsletter General Settings
 NEWSLETTER_AUDIENCE_NAME=base_config("NEWSLETTER_AUDIENCE_NAME")
+
+# Comment settings on blog posts
+COMMENTS_APP = "django_comments_xtd"
+COMMENTS_XTD_FORM_CLASS = 'blog.forms.FilteredCommentForm'
+COMMENTS_XTD_MAX_THREAD_LEVEL = 1
+COMMENTS_XTD_LIST_ORDER = ('-thread_id', 'order')
+COMMENTS_XTD_CONFIRM_EMAIL = False
+COMMENTS_XTD_SALT = (b"Timendi causa est nescire. "
+                    b"Aequam memento rebus in arduis servare mentem.")
+COMMENTS_XTD_APP_MODEL_OPTIONS = {
+    'default': {
+        'allow_flagging': True,
+        'allow_feedback': True,
+        'show_feedback': False,
+        'who_can_post': 'all'
+    },
+}
+
+MANAGERS=[base_config("ADMIN_USER_EMAIL")]

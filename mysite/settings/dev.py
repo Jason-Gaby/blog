@@ -51,8 +51,12 @@ SECRET_KEY = "django-insecure-v%12k_2hq!um5)_$#pdy473gyu0*5v*g3s%d0etqcg(e5)%t80
 # SECURITY WARNING: define the correct hosts in production!
 ALLOWED_HOSTS = ["*"]
 
+# Email settings
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# Comment settings
+COMMENTS_XTD_FROM_EMAIL = "webmaster@example.com"
+COMMENTS_XTD_CONTACT_EMAIL = "helpdesk@example.com"
 
 # reCAPTCHA Configuration
 # Get keys from https://www.google.com/recaptcha/admin
@@ -62,6 +66,9 @@ RECAPTCHA_PRIVATE_KEY = config('CAPTCHA_V2_SECRET_KEY')
 # Newsletter Settings
 NEWSLETTER_SEGMENT_TAG="DEV"
 
+MANAGERS = (
+    ('Joe Bloggs', 'joe.bloggs@example.com'),
+)
 
 try:
     from .local import *
