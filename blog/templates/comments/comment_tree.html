@@ -258,6 +258,13 @@
                         if (activeFormContainer === currentContainer) {
                             currentContainer.innerHTML = html;
                         }
+
+                        const newForm = currentContainer.querySelector('form');
+                            if (newForm) {
+                                // Call the handler function to attach the submit listener!
+                                setupAjaxFormHandler(newForm);
+                            }
+
                     })
                     .catch(error => {
                         currentContainer.innerHTML = `<p class="text-red-500">Error loading form: ${error.message}</p>`;
@@ -265,5 +272,77 @@
                     });
             });
         });
+
+        const topLevelContainer = document.getElementById('top-level-comment-form-container');
+
+        if (topLevelContainer) {
+            // Find the form using the class we set in the template
+            const topLevelForm = topLevelContainer.querySelector('.comment-submission-form');
+
+            if (topLevelForm) {
+                // Attach the AJAX submission listener
+                setupAjaxFormHandler(topLevelForm);
+            }
+        }
+
     });
+
+    function setupAjaxFormHandler(formElement) {
+        formElement.addEventListener('submit', function(e) {
+            e.preventDefault(); // Stop default form submission
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+
+            let currentContainer = form.closest('[id^="reply-form-container"]');
+
+            // If the reply container is not found (meaning it's the top-level form),
+            // search for the top-level container ID.
+            if (!currentContainer) {
+                currentContainer = form.closest('#top-level-comment-form-container');
+            }
+
+            // 🛑 SAFETY CHECK: Ensure we actually found a container before proceeding
+            if (!currentContainer) {
+                console.error("Fatal Error: Could not find a container for the form.");
+                return; // Stop execution to prevent further errors
+            }
+
+            // Display loading message during submission
+            currentContainer.innerHTML = '<p class="text-gray-500 italic">Submitting comment...</p>';
+
+            fetch('{% url "post-ajax" %}', { // Use the name of your new view
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Success: Clear the form and reload the main page to show the new comment
+                    currentContainer.innerHTML = '';
+                    currentContainer.classList.add('hidden');
+                    // 🟢 Redirect the user to the final location (new comment URL)
+                    window.location.href = data.redirect_to;
+                } else if (data.status === 'error') {
+                    // Failure (Profanity): Re-inject the error-ridden form HTML
+                    currentContainer.innerHTML = data.rendered_form_html;
+
+                    // Re-attach the AJAX handler to the newly rendered form!
+                    const newForm = currentContainer.querySelector('form');
+                    if (newForm) {
+                        setupAjaxFormHandler(newForm);
+                    }
+
+                    // Display general message on the form for visibility
+                    alert(`Submission failed: ${data.error_message}`);
+
+                }
+            })
+            .catch(error => {
+                console.error('Submission failed:', error);
+                currentContainer.innerHTML = `<p class="text-red-500">A network error occurred: ${error.message}</p>`;
+            });
+        });
+    }
 </script>

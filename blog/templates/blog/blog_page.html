@@ -105,17 +105,9 @@
 
                     {% if page.allow_comments %}
                         <div class="mb-4 p-6 space-y-4">
-                            <div class="bg-white dark:bg-gray-500 flex flex-col items-center justify-center rounded-lg shadow-mdn p-6">
+                            <div class="bg-white dark:bg-gray-500 flex flex-col items-center justify-center rounded-lg shadow-mdn p-6" id="top-level-comment-form-container">
                                 {% if user.is_authenticated %}
                                     <h4 class="text-xl font-bold mb-2 text-center pb-3">Post your comment</h4>
-                                    {% if messages %}
-                                        {% for message in messages %}
-                                            <div class="p-3 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
-                                                {{ message }}
-                                            </div>
-                                        {% endfor %}
-                                    {% endif %}
-
                                     {% get_comment_form for page as form %}
                                     {% include 'comments/includes/comment_form.html' %}
 
@@ -161,3 +153,5 @@
 
 
 {% endblock %}
+
+

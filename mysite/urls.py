@@ -10,7 +10,7 @@ from search import views as search_views
 from users.views import CustomLoginView, CustomProfileView, CustomPasswordChangeView, CustomPasswordResetView, \
     CustomPasswordResetDoneView, CustomUserRegisterView, CustomLogoutView, CustomPasswordResetConfirmView, \
     CustomPasswordResetCompleteView, subscribe_view
-from blog.views import post_comment_redirect, get_reply_form_snippet
+from blog.views import post_comment_redirect, get_reply_form_snippet, post_reply_ajax
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
@@ -31,6 +31,7 @@ urlpatterns = [
     path('subscribe/', subscribe_view, name='subscribe'),
     path('comments/redirect/', post_comment_redirect, name='comments-post-redirect'),
     path('comments/reply-form/<int:parent_comment_id>/', get_reply_form_snippet, name='get-reply-form-snippet'),
+    path('comments/post-ajax/', post_reply_ajax, name='post-ajax'),
     re_path(r'comments/', include('django_comments_xtd.urls')),
     path("", include(wagtail_urls)),
 ]

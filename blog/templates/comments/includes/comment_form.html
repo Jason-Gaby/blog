@@ -1,6 +1,14 @@
 {% load comments %}
 
-<form class="w-full sm:px-16 px-2" action="{% comment_form_target %}" method="post">
+{% if form.non_field_errors %}
+    <div class="p-3 bg-red-100 border border-red-400 text-red-700 rounded mb-4">
+        {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<form class="comment-submission-form w-full sm:px-16 px-2" action="{% comment_form_target %}" method="post">
     {% csrf_token %}
 
     {% for hidden in form.hidden_fields %}
@@ -17,10 +25,12 @@
                   rows="4"
                   cols="40"
                   class="w-full mt-1 p-2 border rounded-md {% if messages %} text-black border-red-500 bg-red-300{% else %}border-gray-300{% endif %}">
-            {{ comment_data_from_session.comment|default:form.comment.value|default_if_none:"" }}
+            {# 🟢 Use form.data if available (for sticky data) or form.comment.value #}
+            {{ form.data.comment|default:form.comment.value|default_if_none:"" }}
         </textarea>
 
         {# 4. Display the specific error message #}
+        {# 🟢 Display errors from the form object directly #}
         {% for error in form.comment.errors %}
             <p class="text-sm text-red-600 mt-1">{{ error }}</p>
         {% endfor %}
