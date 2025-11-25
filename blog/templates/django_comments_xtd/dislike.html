@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load comments_xtd %}
+
+{# ⚡ JAVASCRIPT: Auto-submit the form as soon as the page loads #}
+{% block extra_js %}
+    <script>
+        window.onload = function () {
+            // Find the form by its ID and submit it instantly
+            document.getElementById('finalSubmissionForm').submit();
+        };
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center my-4">
+            <div class="text-center">
+                <p>Processing...</p>
+                <p>You will be redirected momentarily.</p>
+            </div>
+        </div>
+
+        <form action="." method="post" class="form-horizontal py-4" id="finalSubmissionForm">{% csrf_token %}
+            <input type="hidden" name="next" value="{{ comment.get_absolute_url }}">
+            <div class="form-group">
+                <div class="text-center">
+                    {% if already_disliked_it %}
+                        <input type="submit" name="action_type" class="btn btn-warning" value="{% trans 'Withdraw' %}"/>
+                    {% else %}
+                        <input type="submit" name="action_type" class="btn btn-primary" value="{% trans 'I dislike it' %}"/>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

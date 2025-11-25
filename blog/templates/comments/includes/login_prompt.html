@@ -1,0 +1,4 @@
+<h4 class="btn ml-2 rounded-md p-2 bg-gray-300 dark:bg-gray-900"><a
+    href="{% url "login" %}?next={{ post_submit_redirect | default:request.path }}"
+    class="hover:text-gray-600">Log in to post comments</a>
+</h4>

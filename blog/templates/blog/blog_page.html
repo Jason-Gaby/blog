@@ -117,57 +117,19 @@
                                     {% endif %}
 
                                     {% get_comment_form for page as form %}
-                                    <form class="w-full sm:px-16 px-2" action="{% comment_form_target %}" method="post">
-                                        {% csrf_token %}
+                                    {% include 'comments/includes/comment_form.html' %}
 
-                                        {% for hidden in form.hidden_fields %}
-                                            {{ hidden }}
-                                        {% endfor %}
-
-                                        <div class="w-full mb-3">
-                                            <label for="{{ form.comment.id_for_label }}"
-                                                   class="block text-sm font-medium">Your Comment:</label>
-
-                                            {# Apply a red border class conditionally if errors exist #}
-                                            <textarea id="{{ form.comment.id_for_label }}"
-                                                      name="{{ form.comment.name }}"
-                                                      rows="4"
-                                                      cols="40"
-                                                      class="w-full mt-1 p-2 border rounded-md {% if messages %} text-black border-red-500 bg-red-300{% else %}border-gray-300{% endif %}">
-                                                {{ comment_data_from_session.comment|default:form.comment.value|default_if_none:"" }}
-                                            </textarea>
-
-                                            {# 4. Display the specific error message #}
-                                            {% for error in form.comment.errors %}
-                                                <p class="text-sm text-red-600 mt-1">{{ error }}</p>
-                                            {% endfor %}
-                                        </div>
-
-                                        {# 5. CRITICAL: Add the 'next' field to redirect back to the current page #}
-                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
-
-                                        {# 6. Submit Buttons #}
-                                        <div class="mt-4">
-                                            <input type="submit" name="submit" value="Post"
-                                                   class="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 cursor-pointer">
-                                        </div>
-
-                                    </form>
                                 {% else %}
-                                    <h4 class="btn ml-2 rounded-md p-2 bg-gray-300 dark:bg-gray-900"><a
-                                            href="{% url "login" %}?next={{ request.path }}"
-                                            class="text-white hover:text-gray-600">Log in to post comments</a>
-                                    </h4>
+                                    {% include 'comments/includes/login_prompt.html' %}
                                 {% endif %}
                             </div>
                         </div>
-
 
                         {% if comment_count %}
                             <hr/>
                             <div class="comments sm:px-12 px-4 py-6">
 {#                                {% include 'comments/comment_tree.html' %}#}
-                                {% render_xtdcomment_tree for page allow_flagging using comments/comment_tree.html %}
+                                {% render_xtdcomment_tree for page allow_flagging allow_feedback using comments/comment_tree.html %}
                             </div>
                         {% endif %}
 
