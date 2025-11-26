@@ -22,7 +22,7 @@ def register_newsletter_page_menu_item():
     #    This prevents the Attribute Error and allows the admin to load so you can create the
     #    parent page first.
     if parent_page is None:
-        return
+        return []
         # By returning nothing (None), no menu item is created, and the hook is safely ignored.
 
     # 3. Construct the URL to the 'Add Child Page' view
