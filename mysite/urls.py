@@ -9,7 +9,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from search import views as search_views
 from users.views import CustomLoginView, CustomProfileView, CustomPasswordChangeView, CustomPasswordResetView, \
     CustomPasswordResetDoneView, CustomUserRegisterView, CustomLogoutView, CustomPasswordResetConfirmView, \
-    CustomPasswordResetCompleteView, subscribe_view
+    CustomPasswordResetCompleteView, subscribe_view, request_email_change, confirm_email_change
 from blog.views import post_comment_redirect, get_reply_form_snippet, post_reply_ajax
 
 urlpatterns = [
@@ -25,6 +25,8 @@ urlpatterns = [
     path('account/reset/<uidb64>/<token>/',  CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('account/reset/done/',  CustomPasswordResetCompleteView.as_view(), name='password_reset_complete'),
     path("account/register/", CustomUserRegisterView.as_view(), name="register"),
+    path("account/change_email/", request_email_change, name="request_email_change"),
+    path("account/confirm-email-change/<uidb64>/<pk>/<str:token>/", confirm_email_change, name="confirm_email_change"),
     # This block includes paths like 'password_reset/', 'reset/done/', etc.
     path("account/", include(auth_urls)), # NOTE: THIS MUST BE AFTER CUSTOM VIEWS!
     path("search/", search_views.search, name="search"),

@@ -22,3 +22,20 @@ class User(AbstractUser):
         verbose_name="Subscribe to Email Updates",
         help_text="Check this box to receive periodic updates and newsletters."
     )
+
+    new_email = models.EmailField(
+        _("pending email address"),
+        max_length=254,
+        null=True,
+        blank=True,
+        # This email is NOT required to be unique until it replaces the primary email.
+    )
+    email_verification_token = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True
+    )
+    email_token_created_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )

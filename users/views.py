@@ -1,13 +1,16 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordResetView, \
     PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils import timezone
 from django.views.generic.edit import FormView
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.conf import settings
 from django.db import IntegrityError
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.urls.exceptions import NoReverseMatch
 from django.views.generic import UpdateView
@@ -21,7 +24,7 @@ from django.core.mail import send_mail
 
 import uuid
 
-from .forms import UserUpdateForm, UserRegisterForm, SubscribeForm
+from .forms import UserUpdateForm, UserRegisterForm, SubscribeForm, EmailChangeForm
 
 User = get_user_model()
 
@@ -266,3 +269,91 @@ def send_account_creation_email(request, user):
     except Exception as e:
         # Log the failure but allow the user subscription process to complete
         print(f"Failed to send account creation email to {user.email}: {e}")
+
+
+@login_required
+def request_email_change(request):
+    if request.method == 'POST':
+        form = EmailChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            new_email = form.cleaned_data['new_email']
+            send_email_change_confirmation_email(request.user, new_email, request)
+
+            messages.info(
+                request,
+                f"A confirmation email has been sent to {new_email}. Please check your inbox to confirm the change."
+            )
+            return redirect('profile')  # Redirect to profile page
+    else:
+        form = EmailChangeForm(instance=request.user)
+
+    return render(request, 'registrations/request_email_change.html', {'form': form})
+
+
+def send_email_change_confirmation_email(user, new_email, request):
+    user.email_token_created_at = timezone.now()
+    user.email_verification_token = default_token_generator.make_token(user)
+    user.new_email = new_email.lower()
+    user.save()
+
+    # Email content
+    context = {
+        'user': user,
+        'domain': request.get_host(),
+        'protocol': 'https' if request.is_secure() else 'http',
+        'new_email': user.new_email,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': user.email_verification_token,
+
+        'site_name': getattr(settings, 'WAGTAIL_SITE_NAME'),
+    }
+
+    email_subject = "Confirm Your Email Change"
+    email_body = render_to_string('registrations/email_change_confirmation.html', context)
+    email_plain_content = strip_tags(email_body)
+
+    send_mail(
+        email_subject,
+        email_plain_content,
+        settings.DEFAULT_FROM_EMAIL,
+        [new_email],
+        fail_silently=False,
+        html_message=email_body,
+    )
+
+
+def confirm_email_change(request, pk, token, uidb64):
+    # 1. Fetch the user
+    user = get_object_or_404(User, pk=pk)
+
+    # 2. Check for token match and expiration
+    token_valid = default_token_generator.check_token(user, token)
+    is_expired = (timezone.now() - user.email_token_created_at).days > 1
+
+    if user.new_email and user.email_verification_token == token and token_valid and not is_expired:
+
+        # 3. Success: Update the primary email address
+        old_email = user.email
+        user.email = user.new_email.lower()
+
+        # 4. Clear temporary fields
+        user.new_email = None
+        user.email_verification_token = None
+        user.email_token_created_at = None
+        user.save()
+
+        messages.success(
+            request,
+            f"Your email address has been successfully changed from {old_email} to {user.email}."
+        )
+        # Log the user back in if they weren't already, although typically they are.
+        # login(request, user) # Optional: if you want to ensure they are logged in.
+
+        return redirect('profile')  # Redirect to profile page
+    else:
+        # Failure: Token is invalid, expired, or data is missing
+        messages.error(
+            request,
+            "The email confirmation link is invalid or has expired. Please try changing your email again."
+        )
+        return redirect('request_email_change')

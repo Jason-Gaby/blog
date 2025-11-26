@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Checkbox
 from django import forms
@@ -77,7 +78,7 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         # Define the fields the user can update.
         # NEVER include 'password' here.
-        fields = ('username', 'first_name', 'last_name', 'email', 'profile_picture', 'is_subscribed_to_updates')
+        fields = ('username', 'first_name', 'last_name', 'profile_picture', 'is_subscribed_to_updates')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -99,6 +100,29 @@ def profile_update_view(request):
 
     return render(request, 'users/profile.html', {'form': form})
 
+
+class EmailChangeForm(forms.ModelForm):
+    class Meta:
+        model = User
+        # Only expose the field that stores the requested new email
+        fields = ('new_email',)
+        labels = {
+            'new_email': 'New Email Address',
+        }
+
+    def clean_new_email(self):
+        new_email = self.cleaned_data['new_email'].lower()
+
+        # 1. Check if the new email is already the current email
+        if new_email == self.instance.email.lower():
+            raise ValidationError("This is already your current email address.")
+
+        # 2. Check if the new email is already in use by another user
+        if User.objects.filter(email__iexact=new_email).exists():
+            raise ValidationError("This email address is already in use by another user.")
+
+        return new_email
+
 class SubscribeForm(forms.Form):
     email = forms.EmailField(
         label="Email Address",
@@ -106,7 +130,6 @@ class SubscribeForm(forms.Form):
         required=True,
         widget=forms.EmailInput(attrs={'placeholder': 'Enter your email'})
     )
-    # 💡 You could add a hidden field for the subscription status if needed,
-    # but since the goal is to subscribe, we assume True.
+
 
 
