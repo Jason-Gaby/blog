@@ -143,7 +143,7 @@ class Author(models.Model):
 
 
 class PostCommentModerator(SpamModerator):
-    email_notification = True
+    email_notification = False
     removal_suggestion_notification = True
 
     def moderate(self, comment, content_object, request):
