@@ -2,13 +2,14 @@ from decouple import Config, RepositoryEnv
 import os
 from pathlib import Path
 import paramiko
+import time
 
 def ssh_upload_script_execute_and_download(
         host,
         username,
         local_script_path,
-        remote_file_path,
-        local_download_path,
+        remote_file_path=None,
+        local_download_path=None,
         key_file=None,
         password=None,
         port=22,
@@ -18,14 +19,14 @@ def ssh_upload_script_execute_and_download(
         cleanup_script=True
 ):
     """
-    Upload a bash script to AWS VM, execute it, and download the resulting file.
+    Upload a bash script to AWS VM, execute it, and download the resulting file (or don't if no file is returned)..
 
     Args:
         host (str): IP address or hostname of the AWS VM
         username (str): SSH username (e.g., 'ec2-user', 'ubuntu')
         local_script_path (str): Path to local bash script to upload
         remote_file_path (str): Path to the output file on remote server
-        local_download_path (str): Local path where the file should be saved
+        local_download_path (str, optional): Local path where the file should be saved
         key_file (str, optional): Path to SSH private key file (.pem)
         password (str, optional): SSH password
         port (int, optional): SSH port. Defaults to 22
@@ -114,10 +115,55 @@ def ssh_upload_script_execute_and_download(
         print(f"Executing script: {command}")
         stdin, stdout, stderr = ssh_client.exec_command(command)
 
-        # Wait for script to complete and capture output
-        exit_status = stdout.channel.recv_exit_status()
-        stdout_output = stdout.read().decode('utf-8')
-        stderr_output = stderr.read().decode('utf-8')
+        # --- LIVE STREAMING LOGIC ---
+        # Use stdout.channel to check if the command is still running or has more output
+        channel = stdout.channel
+        channel.setblocking(0)  # Set to non-blocking mode for reading
+
+        # Buffers to store the full output (optional, but useful for returning in result dict)
+        full_stdout = []
+        full_stderr = []
+
+        # Loop while the channel is still open OR there is data waiting to be read
+        while not channel.exit_status_ready() or channel.recv_ready() or channel.recv_stderr_ready():
+
+            # Read and print STDOUT immediately
+            if channel.recv_ready():
+                output = channel.recv(1024).decode('utf-8')
+                print(output, end='')  # Use end='' to print without adding extra newlines
+                full_stdout.append(output)
+
+            # Read and print STDERR immediately (often good to highlight errors)
+            if channel.recv_stderr_ready():
+                error = channel.recv_stderr(1024).decode('utf-8')
+                print(f"\033[91m{error}\033[0m", end='')  # Print in red (ANSI escape code)
+                full_stderr.append(error)
+
+            # Prevent the loop from consuming too much CPU time
+            time.sleep(0.1)
+
+            # Ensure all remaining buffered output is read after the script finishes
+        # Read remaining STDOUT
+        while channel.recv_ready():
+            output = channel.recv(1024).decode('utf-8')
+            print(output, end='')
+            full_stdout.append(output)
+
+        # Read remaining STDERR
+        while channel.recv_stderr_ready():
+            error = channel.recv_stderr(1024).decode('utf-8')
+            print(f"\033[91m{error}\033[0m", end='')
+            full_stderr.append(error)
+
+        print("\n--- End of Output ---")
+
+        # Now, retrieve the final exit status
+        exit_status = channel.recv_exit_status()
+        print(f"\nScript exit status: {exit_status}")
+
+        # Join the lists to get the complete string outputs
+        stdout_output = "".join(full_stdout)
+        stderr_output = "".join(full_stderr)
 
         print(f"Script exit status: {exit_status}")
 
@@ -149,17 +195,18 @@ def ssh_upload_script_execute_and_download(
 
         print("✓ Script executed successfully!")
 
-        # Download the output file
-        print(f"Downloading file from {remote_file_path}...")
+        if remote_file_path:
+            # Download the output file
+            print(f"Downloading file from {remote_file_path}...")
 
-        # Create local directory if it doesn't exist
-        local_dir = os.path.dirname(local_download_path)
-        if local_dir:
-            Path(local_dir).mkdir(parents=True, exist_ok=True)
+            # Create local directory if it doesn't exist
+            local_dir = os.path.dirname(local_download_path)
+            if local_dir:
+                Path(local_dir).mkdir(parents=True, exist_ok=True)
 
-        # Download the file
-        sftp_client.get(remote_file_path, local_download_path)
-        print(f"✓ File downloaded successfully to {local_download_path}")
+            # Download the file
+            sftp_client.get(remote_file_path, local_download_path)
+            print(f"✓ File downloaded successfully to {local_download_path}")
 
         # Get file stats
         file_stats = sftp_client.stat(remote_file_path)
@@ -177,7 +224,6 @@ def ssh_upload_script_execute_and_download(
             'exit_status': exit_status,
             'stdout': stdout_output,
             'stderr': stderr_output,
-            'local_file_path': local_download_path,
             'remote_file_path': remote_file_path,
             'remote_script_path': remote_script_path,
             'file_size': file_stats.st_size,
