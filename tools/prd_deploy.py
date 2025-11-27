@@ -90,23 +90,23 @@ def copy_and_overwrite_any(source_path, destination_path):
 if __name__ == "__main__":
     config = Config(RepositoryEnv(".env.dev"))
 
-    # # Collect static files
-    # collectstatic_cmd = f"python manage.py collectstatic --noinput"
-    # run_local_command(collectstatic_cmd, "Django collectstatic")
-    #
-    # # Copy local files into upload folder
-    # files = ['static', '.env.production', '.env.base']
-    # for file in files:
-    #     copy_and_overwrite_any(f'./{file}', f'./upload/{file}')
-    #
-    # # Upload files
-    # ssh_upload_folder(
-    #     host=config('EC2_HOSTNAME'),
-    #     username=config('EC2_USER'),
-    #     local_folder=f'{ROOT_DIR}/upload/',
-    #     remote_folder='/tmp/upload/',
-    #     key_file=config('SSH_KEY_PATH'),
-    # )
+    # Collect static files
+    collectstatic_cmd = f"python manage.py collectstatic --noinput"
+    run_local_command(collectstatic_cmd, "Django collectstatic")
+
+    # Copy local files into upload folder
+    files = ['static', '.env.production', '.env.base']
+    for file in files:
+        copy_and_overwrite_any(f'./{file}', f'./upload/{file}')
+
+    # Upload files
+    ssh_upload_folder(
+        host=config('EC2_HOSTNAME'),
+        username=config('EC2_USER'),
+        local_folder=f'{ROOT_DIR}/upload/',
+        remote_folder='/tmp/upload/',
+        key_file=config('SSH_KEY_PATH'),
+    )
 
     # Run build bash script
     bash_script_name = 'prd_deploy.sh'
