@@ -37,8 +37,10 @@
 {% include "includes/section_divider.html" %}
 
 <section>
-    <div class="container mx-auto flex md:px-24 md:py-10 md:flex-row flex-col items-center">
-        {{ page.body| richtext }}
+    <div class="container mx-auto flex md:px-24 md:py-10 flex-col items-center">
+        <div class="richtext-content">
+            {{ page.body| safe }}
+        </div>
     </div>
 </section>
 
