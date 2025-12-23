@@ -18,9 +18,13 @@ from modelcluster.contrib.taggit import ClusterTaggableManager
 from taggit.models import TaggedItemBase
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel
 from wagtail.models import Page, Orderable
-from wagtail.fields import RichTextField
+from wagtail.fields import RichTextField, StreamField
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
+from wagtail.blocks import RichTextBlock
+
+from blog.blocks import PlotlyBlock
+
 
 class BlogPageTag(TaggedItemBase):
     content_object = ParentalKey(
@@ -33,6 +37,7 @@ class BlogPageTag(TaggedItemBase):
         index.SearchField('intro'),
         index.SearchField('body'),
     ]
+
 
 class BlogTagIndexPage(Page):
     def get_context(self, request, *args, **kwargs):
@@ -51,6 +56,7 @@ class BlogTagIndexPage(Page):
 
 class BlogIndexPage(Page):
     intro = models.CharField(max_length=255)
+
     # add the get_context method:
     def get_context(self, request):
         # Update context to include only published posts, ordered by reverse-chron
@@ -65,7 +71,12 @@ class BlogIndexPage(Page):
 class BlogPage(Page):
     date = models.DateField("Post Date", default=timezone.now)
     intro = models.CharField(max_length=255)
-    body = RichTextField(blank=True)
+    body = StreamField([
+        ('text', RichTextBlock(blank=True)),
+        ('chart', PlotlyBlock())
+    ], use_json_field=True
+    )
+
     authors = ParentalManyToManyField('blog.Author', blank=True)
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
     allow_comments = models.BooleanField("allow comments", default=True)
@@ -113,6 +124,7 @@ class BlogPage(Page):
         ).select_related('user')  # <-- This fetches the User data efficiently
 
         return comment_list
+
 
 class BlogPageGalleryImage(Orderable):
     page = ParentalKey(BlogPage, on_delete=models.CASCADE, related_name='gallery_images')

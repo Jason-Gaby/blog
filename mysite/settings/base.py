@@ -13,12 +13,19 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 from decouple import Config, RepositoryEnv
 
 base_config = Config(RepositoryEnv(".env.base"))
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
+GRAPH_DIR_NAME = base_config('GRAPH_DIR_NAME')
+GRAPH_DIR = os.path.join(base_config('GRAPH_ROOT_DIR'), GRAPH_DIR_NAME)
+
+# GRAPH SETTINGS
+if os.path.exists(GRAPH_DIR):
+    sys.path.append(GRAPH_DIR)
 
 
 # Quick-start development settings - unsuitable for production

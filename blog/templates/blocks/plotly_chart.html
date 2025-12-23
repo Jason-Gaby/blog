@@ -1,0 +1,17 @@
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<div class="plotly-wrapper">
+    {% if error %}
+        <div style="color: red; border: 1px solid red; padding: 10px;">
+            <strong>Error loading graph:</strong> {{ error }}
+        </div>
+    {% elif chart_json %}
+        <div id="chart-{{ block_id }}" style="width:100%; min-height:400px; display:block;"></div>
+        <script>
+            (function() {
+                var figure = {{ chart_json|safe }};
+                Plotly.newPlot("chart-{{ block_id }}", figure.data, figure.layout, {responsive: true});
+            })();
+        </script>
+    {% endif %}
+</div>
