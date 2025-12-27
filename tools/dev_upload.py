@@ -46,11 +46,6 @@ def upload_folder(local_path_key, remote_path_key):
 
 def main():
     # 1. Git Push Process
-    # We use 'git add .' and 'git commit' as well, otherwise push might have nothing to do
-    commit_msg = input("Enter commit message (or press Enter for 'auto-upload'): ") or "auto-upload"
-
-    run_command("git add .", "Staging changes")
-    run_command(f'git commit -m "{commit_msg}"', "Committing changes")
     run_command("git push", "Pushing to Remote Repository")
 
     # 2. Upload Folders (Target -> Source)
