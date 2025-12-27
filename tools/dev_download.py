@@ -48,7 +48,6 @@ def main():
     # 4. Upload Folders (Target -> Source)
     sync_map = [
         (config("LOCAL_STATIC"), config("REMOTE_STATIC")),
-        (config("LOCAL_FILES"), config("REMOTE_FILES")),
         (config("LOCAL_MEDIA"), config("REMOTE_MEDIA")),
         (config("LOCAL_GRAPHS"), config("REMOTE_GRAPHS"))
     ]
