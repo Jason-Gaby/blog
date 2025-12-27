@@ -1,7 +1,9 @@
 from .base import *
 from decouple import Config, RepositoryEnv
 
-config = Config(RepositoryEnv(".env.dev"))
+from definitions import ENV_DIR
+
+config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

@@ -2,9 +2,8 @@
 
 *.sqlite3
 
-.env.production
-.env.dev
-**/.env.**
+.env/
+
 tailwindcss.exe
 
 downloads/

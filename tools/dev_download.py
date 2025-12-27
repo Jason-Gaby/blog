@@ -1,10 +1,18 @@
 import os
 import subprocess
 import shutil
-from decouple import Config, RepositoryEnv
+import stat
+from decouple import Config, RepositoryEnv, Csv
+
+from definitions import ENV_DIR
 
 # Load environment variables
-config = Config(RepositoryEnv(".env.dev"))
+config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
+
+def remove_readonly(func, path, _):
+    """Clear the readonly bit and reattempt the removal."""
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
 
 def run_command(command, description):
     """Runs a shell command and handles basic error reporting."""
@@ -15,23 +23,16 @@ def run_command(command, description):
     except subprocess.CalledProcessError as e:
         print(f"Error during {description}: {e}\n")
 
-def sync_folder(env_source_key, env_target_key):
+def sync_folder(local_dir, remote_dir):
     """Copies content from source to target defined in .env."""
-    src = os.getenv(env_source_key)
-    dst = os.getenv(env_target_key)
-
-    if not src or not dst:
-        print(f"Skipping {env_source_key}: Path not found in .env")
-        return
-
-    print(f"--- Syncing {env_source_key} to {env_target_key} ---")
+    print(f"--- Syncing {remote_dir} to {local_dir} ---")
     try:
-        if os.path.exists(dst):
-            shutil.rmtree(dst) # Clean target to ensure a fresh sync
-        shutil.copytree(src, dst)
-        print(f"Successfully synced to {dst}\n")
+        if os.path.exists(local_dir):
+            shutil.rmtree(local_dir, onerror=remove_readonly) # Clean target to ensure a fresh sync
+        shutil.copytree(remote_dir, local_dir)
+        print(f"Successfully synced to {local_dir}\n")
     except Exception as e:
-        print(f"Failed to sync {src}: {e}\n")
+        print(f"Failed to sync {remote_dir}: {e}\n")
 
 def main():
     # 1. Git Pull
@@ -40,16 +41,29 @@ def main():
     # 2. Pip Install
     run_command("pip install -r requirements.txt", "Installing Requirements")
 
-    # 3-6. Sync Folders
+    # 3. Sync Folders
+    remote_dir = config("REMOTE_DIR")
+    local_dir = config("LOCAL_DIR")
+
+    # 4. Upload Folders (Target -> Source)
     sync_map = [
-        ("SOURCE_STATIC", "TARGET_STATIC"),
-        ("SOURCE_FILES", "TARGET_FILES"),
-        ("SOURCE_MEDIA", "TARGET_MEDIA"),
-        ("SOURCE_GRAPHS", "TARGET_GRAPHS")
+        (config("LOCAL_STATIC"), config("REMOTE_STATIC")),
+        (config("LOCAL_FILES"), config("REMOTE_FILES")),
+        (config("LOCAL_MEDIA"), config("REMOTE_MEDIA")),
+        (config("LOCAL_GRAPHS"), config("REMOTE_GRAPHS"))
     ]
 
-    for src_key, dst_key in sync_map:
-        sync_folder(src_key, dst_key)
+    for local_key, remote_key in sync_map:
+        local_path = os.path.join(local_dir, local_key)
+        remote_path = os.path.join(remote_dir, remote_key)
+        sync_folder(local_path, remote_path)
+
+    # 5. Sync special folders
+    sync_folders = config('SYNC_FOLDERS', cast=Csv())
+    for folder in sync_folders:
+        source_path = os.path.join(local_dir, config('LOCAL_STATIC'), folder)
+        target_path = os.path.join(local_dir, config('SYNC_ROOT_DIR'), folder)
+        sync_folder(target_path, source_path)
 
     print("All processes completed!")
 

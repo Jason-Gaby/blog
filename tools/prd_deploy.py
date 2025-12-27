@@ -1,6 +1,7 @@
 from decouple import Config, RepositoryEnv
 from tools.ssh.upload_and_run_bash_script import ssh_upload_script_execute_and_download
 from tools.ssh.upload_files import ssh_upload_folder
+from definitions import ENV_DIR
 
 import subprocess
 import shutil
@@ -88,7 +89,7 @@ def copy_and_overwrite_any(source_path, destination_path):
     print("✓ Copy and overwrite complete.")
 
 if __name__ == "__main__":
-    config = Config(RepositoryEnv(".env.dev"))
+    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
 
     # Collect static files
     collectstatic_cmd = f"python manage.py collectstatic --noinput"

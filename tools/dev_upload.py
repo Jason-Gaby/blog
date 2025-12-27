@@ -3,8 +3,10 @@ import subprocess
 import shutil
 from decouple import Config, RepositoryEnv
 
+from definitions import ENV_DIR
+
 # Load environment variables
-config = Config(RepositoryEnv(".env.dev"))
+config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
 
 
 def run_command(command, description):
@@ -19,15 +21,7 @@ def run_command(command, description):
         exit(1)
 
 
-def upload_folder(local_path_key, remote_path_key):
-    """Copies content from local target to remote source."""
-    local_dir = os.getenv(local_path_key)
-    remote_dir = os.getenv(remote_path_key)
-
-    if not local_dir or not remote_dir:
-        print(f"Skipping: Keys {local_path_key} or {remote_path_key} not in .env")
-        return
-
+def upload_folder(local_dir, remote_dir):
     print(f"--- Uploading {local_dir} -> {remote_dir} ---")
     try:
         if not os.path.exists(local_dir):
@@ -48,16 +42,21 @@ def main():
     # 1. Git Push Process
     run_command("git push", "Pushing to Remote Repository")
 
+    remote_dir = config("REMOTE_DIR")
+    local_dir = config("LOCAL_DIR")
+
     # 2. Upload Folders (Target -> Source)
     sync_map = [
-        (config("TARGET_STATIC"), config("SOURCE_STATIC")),
-        (config("TARGET_FILES"), config("SOURCE_FILES")),
-        (config("TARGET_MEDIA"), config("SOURCE_MEDIA")),
-        (config("TARGET_GRAPHS"), config("SOURCE_GRAPHS"))
+        (config("LOCAL_STATIC"), config("REMOTE_STATIC")),
+        (config("LOCAL_FILES"), config("REMOTE_FILES")),
+        (config("LOCAL_MEDIA"), config("REMOTE_MEDIA")),
+        (config("LOCAL_GRAPHS"), config("REMOTE_GRAPHS"))
     ]
 
     for local_key, remote_key in sync_map:
-        upload_folder(local_key, remote_key)
+        local_path = os.path.join(local_dir, local_key)
+        remote_path = os.path.join(remote_dir, remote_key)
+        upload_folder(local_path, remote_path)
 
     print("--- Process Finished Successfully ---")
 

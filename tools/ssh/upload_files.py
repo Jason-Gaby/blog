@@ -3,6 +3,8 @@ import paramiko
 from pathlib import Path
 from decouple import Config, RepositoryEnv
 
+from definitions import ENV_DIR
+
 def ssh_upload_folder(
         host,
         username,
@@ -157,7 +159,7 @@ def ssh_upload_folder(
 # Example usage
 if __name__ == "__main__":
     # Configuration is loaded or mocked here
-    config = Config(RepositoryEnv(".env.dev"))
+    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
 
     # IMPORTANT: Replace these with your actual connection details for a real test
     local_folder = "./uploads/"

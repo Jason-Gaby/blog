@@ -3,6 +3,8 @@ import paramiko
 from pathlib import Path
 from decouple import Config, RepositoryEnv
 
+from definitions import ENV_DIR
+
 
 def ssh_download_folder(
         host,
@@ -155,7 +157,7 @@ def ssh_download_folder(
 if __name__ == "__main__":
     # Assuming .env.dev contains EC2_HOSTNAME, EC2_USER, and SSH_KEY_PATH
     # For testing, ensure your remote server has files in /tmp/upload/
-    config = Config(RepositoryEnv(".env.dev"))
+    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
 
     # IMPORTANT: Replace these with your actual connection details
     remote_folder_to_download = "/tmp/downloads/"

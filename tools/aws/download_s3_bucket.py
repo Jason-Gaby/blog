@@ -4,6 +4,8 @@ from decouple import Config, RepositoryEnv
 import os
 from pathlib import Path
 
+from definitions import ENV_DIR
+
 
 def download_s3_bucket(
         bucket_name,
@@ -208,7 +210,7 @@ def _format_size(bytes):
 
 # Example usage
 if __name__ == "__main__":
-    config = Config(RepositoryEnv(".env.dev"))
+    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
 
     buckets = [config('AWS_STATIC_STORAGE_BUCKET_NAME'), config('AWS_MEDIA_STORAGE_BUCKET_NAME')]
     #buckets = [config('AWS_MEDIA_STORAGE_BUCKET_NAME')]

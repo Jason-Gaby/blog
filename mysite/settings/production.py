@@ -1,9 +1,11 @@
 from decouple import Config, RepositoryEnv
 import os
 
+from definitions import ENV_DIR
+
 from .base import *
 
-config = Config(RepositoryEnv(".env.production"))
+config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.production")))
 
 DEBUG = False
 

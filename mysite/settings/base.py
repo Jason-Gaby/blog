@@ -16,7 +16,9 @@ import os
 import sys
 from decouple import Config, RepositoryEnv
 
-base_config = Config(RepositoryEnv(".env.base"))
+from definitions import ENV_DIR
+
+base_config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.base")))
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)

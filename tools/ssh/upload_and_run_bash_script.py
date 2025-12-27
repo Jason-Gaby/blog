@@ -4,6 +4,8 @@ from pathlib import Path
 import paramiko
 import time
 
+from definitions import ENV_DIR
+
 def ssh_upload_script_execute_and_download(
         host,
         username,
@@ -265,7 +267,7 @@ def ssh_upload_script_execute_and_download(
 
 # Example usage
 if __name__ == "__main__":
-    config = Config(RepositoryEnv(".env.dev"))
+    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
     bash_script_name = 'db_dump_json.sh'
     output_file_name = 'data.json'
     remote_file_path = f'/tmp/{output_file_name}'
