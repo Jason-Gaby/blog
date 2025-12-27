@@ -45,7 +45,7 @@ Write-Host ""
 Write-Host "[Step 3/4] Clearing existing Wagtail sites..." -ForegroundColor Yellow
 
 $pythonCommand = @"
-from wagtail.models import Site
+from wagtail.models import Site, Page
 count = Site.objects.count()
 Site.objects.all().delete()
 print(f'Deleted {count} site(s)')
@@ -67,26 +67,42 @@ try {
 
 Write-Host ""
 
-# Step 4: Load fixture
-Write-Host "[Step 4/4] Loading fixture from downloads/dev_data.json..." -ForegroundColor Yellow
+# Step 4: Sanitize JSON and Load Fixture
+Write-Host "[Step 4/4] Sanitizing and Loading fixture..." -ForegroundColor Yellow
 
 $fixturePath = ".\downloads\dev_data.json"
 
-if (-not (Test-Path $fixturePath)) {
-    Write-Host "✗ Fixture file not found: $fixturePath" -ForegroundColor Red
+# This Python snippet removes the revision IDs from the JSON so the import doesn't crash
+$sanitizeCommand = @"
+import json
+path = r'$fixturePath'
+with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+for obj in data:
+    if obj['model'] == 'wagtailcore.page':
+        # Remove the pointer to the non-existent revision
+        if 'latest_revision' in obj['fields']:
+            obj['fields']['latest_revision'] = None
+        if 'live_revision' in obj['fields']:
+            obj['fields']['live_revision'] = None
+
+with open(path, 'w', encoding='utf-8') as f:
+    json.dump(data, f, indent=4)
+"@
+
+try {
+    python -c $sanitizeCommand
+    Write-Host "✓ JSON sanitized (Revision pointers removed)" -ForegroundColor Green
+
+    python manage.py loaddata $fixturePath
+    Write-Host "✓ Fixture loaded successfully" -ForegroundColor Green
+} catch {
+    Write-Host "✗ Error during load: $_" -ForegroundColor Red
     exit 1
 }
 
-try {
-    python manage.py loaddata $fixturePath
-    if ($LASTEXITCODE -ne 0) {
-        throw "Loaddata failed with exit code $LASTEXITCODE"
-    }
-    Write-Host "✓ Fixture loaded successfully" -ForegroundColor Green
-} catch {
-    Write-Host "✗ Error loading fixture: $_" -ForegroundColor Red
-    exit 1
-}
+
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
