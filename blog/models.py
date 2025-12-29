@@ -23,7 +23,7 @@ from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 from wagtail.blocks import RichTextBlock
 
-from blog.blocks import PlotlyBlock
+from blog.blocks import PlotlyBlock, DashBlock
 
 
 class BlogPageTag(TaggedItemBase):
@@ -73,7 +73,8 @@ class BlogPage(Page):
     intro = models.CharField(max_length=255)
     body = StreamField([
         ('text', RichTextBlock(blank=True)),
-        ('chart', PlotlyBlock())
+        ('chart', PlotlyBlock()),
+        ('dash', DashBlock())
     ], use_json_field=True
     )
 

@@ -61,3 +61,14 @@ class PlotlyBlock(blocks.StructBlock):
     class Meta:
         template = "blocks/plotly_chart.html"
         icon = "code"
+
+
+class DashBlock(blocks.StructBlock):
+    url = blocks.URLBlock(help_text="The URL of the Dash app (e.g., http://54.x.x.x:8050)")
+    title = blocks.CharBlock(required=False, help_text="For accessibility/screen readers")
+    height = blocks.IntegerBlock(default=600, help_text="Height in pixels")
+
+    class Meta:
+        template = "blocks/dash_app.html"
+        icon = "code"
+        label = "Dash Dashboard"
