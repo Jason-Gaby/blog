@@ -49,7 +49,6 @@ def main():
     sync_map = [
         (config("LOCAL_STATIC"), config("REMOTE_STATIC")),
         (config("LOCAL_MEDIA"), config("REMOTE_MEDIA")),
-        (config("LOCAL_GRAPHS"), config("REMOTE_GRAPHS"))
     ]
 
     for local_key, remote_key in sync_map:
