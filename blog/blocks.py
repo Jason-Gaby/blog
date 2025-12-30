@@ -64,9 +64,18 @@ class PlotlyBlock(blocks.StructBlock):
 
 
 class DashBlock(blocks.StructBlock):
-    url = blocks.URLBlock(help_text="The URL of the Dash app (e.g., http://54.x.x.x:8050)")
+    url_suffix = blocks.CharBlock(
+        help_text=f"Enter the app suffix only (e.g., 'app1/'). Base URL {settings.DASH_APP_BASE_URL} is added automatically.",
+        label="App Path"
+    )
     title = blocks.CharBlock(required=False, help_text="For accessibility/screen readers")
     height = blocks.IntegerBlock(default=600, help_text="Height in pixels")
+
+    def get_context(self, value, parent_context=None):
+        context = super().get_context(value, parent_context=parent_context)
+        # Add the setting to the context so it's available in the template
+        context['url_prefix'] = settings.DASH_APP_BASE_URL
+        return context
 
     class Meta:
         template = "blocks/dash_app.html"

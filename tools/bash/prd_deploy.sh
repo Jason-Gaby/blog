@@ -11,7 +11,7 @@ echo "=========================================="
 
 echo "=========================================="
 echo "Moving uploaded files from /tmp/upload to $PROJECT_ROOT:"
-cp -r -f /tmp/upload/* "$PROJECT_ROOT/"
+cp -r -f /tmp/uploads/. "$PROJECT_ROOT/"
 echo "Complete."
 echo "=========================================="
 

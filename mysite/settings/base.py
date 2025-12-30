@@ -186,7 +186,8 @@ WAGTAILSEARCH_BACKENDS = {
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
-WAGTAILADMIN_BASE_URL = "https://jag-economics.com"
+WAGTAILADMIN_BASE_URL = base_config('WAGTAILADMIN_BASE_URL')
+DASH_APP_BASE_URL = base_config('DASH_APP_BASE_URL')
 
 # Allowed file extensions for documents in the document library.
 # This can be omitted to allow all files, but note that this may present a security risk

@@ -35,58 +35,38 @@ def run_local_command(command, description):
         raise
 
 
-def copy_and_overwrite_any(source_path, destination_path):
+def copy_and_overwrite_any(source_path, destination_root):
     """
-    Copies a file OR the contents of a directory (source_path)
-    into a target directory (destination_path), overwriting existing files.
+    source_path: The file or folder to copy.
+    destination_root: The folder where the source should be placed.
     """
-    source_path = Path(source_path)
-    destination_path = Path(destination_path)
+    source = Path(source_path)
+    dest_root = Path(destination_root)
 
-    print(f"\n--- Copying '{source_path}' to '{destination_path}' (Overwriting) ---")
-
-    if not source_path.exists():
-        print(f"Error: Source path '{source_path}' not found.")
+    if not source.exists():
+        print(f"Error: Source '{source}' not found.")
         return
 
     # --- 1. Handle Case: Source is a FILE ---
-    if source_path.is_file():
-        # The destination must be a directory where the file will be placed.
-        os.makedirs(destination_path, exist_ok=True)
+    if source.is_file():
+        # Ensure the destination directory exists (e.g., /tmp/upload/.env/)
+        dest_root.mkdir(parents=True, exist_ok=True)
 
-        dest_file = destination_path / source_path.name
-        shutil.copy2(str(source_path), str(dest_file))
-        print(f"Copied file: {source_path} -> {dest_file}")
-        print("✓ Copy complete.")
-        return
+        # Define the final file path (e.g., /tmp/upload/.env/.env.base)
+        dest_file = dest_root / source.name
 
-    # --- 2. Handle Case: Source is a FOLDER (Original Logic) ---
+        shutil.copy2(source, dest_file)
+        print(f"Copied file: {source} -> {dest_file}")
 
-    # Create the destination root directory if it doesn't exist
-    os.makedirs(destination_path, exist_ok=True)
+    # --- 2. Handle Case: Source is a FOLDER ---
+    else:
+        # Define the target folder (e.g., /tmp/upload/static)
+        dest_folder = dest_root / source.name
 
-    # Walk through the source directory tree
-    for root, dirs, files in os.walk(source_path):
-        # Construct the relative path from the source_path
-        relative_path = Path(root).relative_to(source_path)
+        # dirs_exist_ok=True allows merging/overwriting existing folders
+        shutil.copytree(source, dest_folder, dirs_exist_ok=True)
+        print(f"Copied folder: {source} -> {dest_folder}")
 
-        # Construct the full destination path for the current directory
-        dest_path = destination_path / relative_path
-
-        # Create necessary subdirectories in the destination
-        for d in dirs:
-            os.makedirs(dest_path / d, exist_ok=True)
-
-        # Copy files, overwriting if necessary
-        for f in files:
-            source_file = Path(root) / f
-            dest_file = dest_path / f
-
-            # copy2 is preferred as it attempts to preserve metadata (timestamps)
-            shutil.copy2(str(source_file), str(dest_file))
-            print(f"Copied: {source_file} -> {dest_file}")
-
-    print("✓ Copy and overwrite complete.")
 
 if __name__ == "__main__":
     config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
@@ -95,17 +75,27 @@ if __name__ == "__main__":
     collectstatic_cmd = f"python manage.py collectstatic --noinput"
     run_local_command(collectstatic_cmd, "Django collectstatic")
 
-    # Copy local files into upload folder
-    files = ['static', '.env.production', '.env.base']
-    for file in files:
-        copy_and_overwrite_any(f'./{file}', f'./upload/{file}')
+    # The base folder where you want everything to end up
+    UPLOAD_DIR = "./uploads"
+
+    # List of items to copy
+    # We use a tuple (source, relative_dest_subfolder)
+    items_to_copy = [
+        ('static', ''),  # Goes to ./upload/static
+        ('.env/.env.production', '.env'),  # Goes to ./upload/.env/.env.production
+        ('.env/.env.base', '.env')  # Goes to ./upload/.env/.env.base
+    ]
+
+    for src, subfolder in items_to_copy:
+        target_dir = Path(UPLOAD_DIR) / subfolder
+        copy_and_overwrite_any(src, target_dir)
 
     # Upload files
     ssh_upload_folder(
         host=config('EC2_HOSTNAME'),
         username=config('EC2_USER'),
-        local_folder=f'{ROOT_DIR}/upload/',
-        remote_folder='/tmp/upload/',
+        local_folder=f'{ROOT_DIR}/uploads/',
+        remote_folder='/tmp/uploads/',
         key_file=config('SSH_KEY_PATH'),
     )
 
