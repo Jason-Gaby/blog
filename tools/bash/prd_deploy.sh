@@ -2,6 +2,7 @@
 
 VENV_FILE="$1"
 PROJECT_ROOT="$2"
+CONTENT_ROOT="$3"
 
 echo "=========================================="
 echo "Processing with arguments:"
@@ -27,11 +28,14 @@ echo "=========================================="
 
 
 echo "=========================================="
-echo "Pull git and update for any requirements:"
+echo "Pull git and update for any requirements."
+echo "Also install blog content package."
 git pull
 pip install -r requirements.txt
+pip install -e "$CONTENT_ROOT"
 echo "Complete."
 echo "=========================================="
+
 
 
 echo "=========================================="

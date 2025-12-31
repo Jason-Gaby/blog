@@ -108,7 +108,8 @@ if __name__ == "__main__":
 
     venv_path = config('VENV_PATH')
     project_root = config('PROJECT_ROOT')
-    script_args = f'{venv_path} {project_root}'
+    content_root = config('CONTENT_ROOT_DIR')
+    script_args = f'{venv_path} {project_root} {content_root}'
 
     result = ssh_upload_script_execute_and_download(
         host=config('EC2_HOSTNAME'),

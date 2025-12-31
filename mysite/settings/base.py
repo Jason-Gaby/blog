@@ -218,3 +218,7 @@ COMMENTS_XTD_APP_MODEL_OPTIONS = {
         'who_can_post': 'all'
     },
 }
+
+
+# Custom Imports
+CONTENT_MODULE_NAME=base_config("CONTENT_MODULE_NAME")

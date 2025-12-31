@@ -7,7 +7,7 @@ from wagtail import blocks
 
 def get_plotly_figures():
     """Scans the 'graphs' directory for python files."""
-    graph_dir = os.path.join(settings.GRAPH_DIR)
+    graph_dir = settings.GRAPH_DIR
     choices = []
 
     if not os.path.exists(graph_dir):
@@ -23,9 +23,12 @@ def get_plotly_figures():
                 # Convert file path to python module path (folder.file)
                 module_path = rel_path.replace(os.sep, '.')[:-3]
 
+                # Prepend the package name
+                full_import_path = f"{settings.CONTENT_MODULE_NAME}.{module_path}"
+
                 # Human-friendly label (Folder > File)
                 label = module_path.split(".")[0].replace('_', '-').title() + " > " + module_path.split(".")[-1].replace('_', ' ').title()
-                choices.append((module_path, label))
+                choices.append((full_import_path, label))
 
     return sorted(choices)
 
