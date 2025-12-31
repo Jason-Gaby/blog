@@ -1,5 +1,6 @@
 from .base import *
 from decouple import Config, RepositoryEnv
+import os
 
 from definitions import ENV_DIR
 
@@ -76,3 +77,10 @@ try:
     from .local import *
 except ImportError:
     pass
+
+
+# PLOTLY GRAPH SETTINGS
+GRAPH_DIR_NAME = config('GRAPH_DIR_NAME')
+GRAPH_DIR = config('GRAPH_ROOT_DIR')
+if os.path.exists(GRAPH_DIR):
+    sys.path.append(GRAPH_DIR)

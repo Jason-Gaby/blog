@@ -16,7 +16,7 @@ def get_plotly_figures():
     # os.walk looks through all subdirectories
     for root, dirs, files in os.walk(graph_dir):
         for file in files:
-            if file.endswith(".py") and file != "__init__.py":
+            if file.endswith(".py") and os.path.basename(root) == settings.GRAPH_DIR_NAME and file != "__init__.py":
                 # Get the relative path (e.g., '2023_10_01_sales\chart')
                 rel_path = os.path.relpath(os.path.join(root, file), graph_dir)
 
@@ -24,8 +24,7 @@ def get_plotly_figures():
                 module_path = rel_path.replace(os.sep, '.')[:-3]
 
                 # Human-friendly label (Folder > File)
-                label = module_path.replace('.', ' > ').replace('_', ' ').title()
-
+                label = module_path.split(".")[0].replace('_', '-').title() + " > " + module_path.split(".")[-1].replace('_', ' ').title()
                 choices.append((module_path, label))
 
     return sorted(choices)
@@ -33,6 +32,7 @@ def get_plotly_figures():
 
 class PlotlyBlock(blocks.StructBlock):
     # The dropdown choices are refreshed whenever the server restarts or the code is evaluated
+    get_plotly_figures()
     script_selection = blocks.ChoiceBlock(choices=get_plotly_figures)
 
     def get_context(self, value, parent_context=None):
