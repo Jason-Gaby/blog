@@ -22,15 +22,19 @@ echo "=========================================="
 echo "Activating virtual environment:"
 source "$VENV_FILE"
 export DJANGO_SETTINGS_MODULE=mysite.settings.production
-cd "$PROJECT_ROOT"
 echo "Complete."
 echo "=========================================="
 
 
 echo "=========================================="
-echo "Pull git and update for any requirements."
+echo "Pull git for both projects and update for any requirements."
 echo "Also install blog content package."
+cd "$CONTENT_ROOT"
 git pull
+
+cd "$PROJECT_ROOT"
+git pull
+
 pip install -r requirements.txt
 pip install -e "$CONTENT_ROOT"
 echo "Complete."

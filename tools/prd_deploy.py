@@ -69,7 +69,8 @@ def copy_and_overwrite_any(source_path, destination_root):
 
 
 if __name__ == "__main__":
-    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
+    dev_config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
+    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.production")))
 
     # Collect static files
     collectstatic_cmd = f"python manage.py collectstatic --noinput"
@@ -96,7 +97,7 @@ if __name__ == "__main__":
         username=config('EC2_USER'),
         local_folder=f'{ROOT_DIR}/uploads/',
         remote_folder='/tmp/uploads/',
-        key_file=config('SSH_KEY_PATH'),
+        key_file=dev_config('SSH_KEY_PATH'),
     )
 
     # Run build bash script
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     host = config('EC2_HOSTNAME'),
     username = config('EC2_USER'),
     local_script_path = f'{ROOT_DIR}/tools/bash/{bash_script_name}',
-    key_file = config('SSH_KEY_PATH'),
+    key_file = dev_config('SSH_KEY_PATH'),
 
     venv_path = config('VENV_PATH')
     project_root = config('PROJECT_ROOT')
@@ -115,7 +116,7 @@ if __name__ == "__main__":
         host=config('EC2_HOSTNAME'),
         username=config('EC2_USER'),
         local_script_path=f'{ROOT_DIR}/tools/bash/{bash_script_name}',
-        key_file=config('SSH_KEY_PATH'),
+        key_file=dev_config('SSH_KEY_PATH'),
         script_args=script_args,
     )
 
