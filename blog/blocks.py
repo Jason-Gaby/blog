@@ -8,6 +8,7 @@ from wagtail import blocks
 def get_plotly_figures():
     """Scans the 'graphs' directory for python files."""
     graph_dir = settings.GRAPH_DIR
+    module_root = settings.CONTENT_ROOT_DIR
     choices = []
 
     if not os.path.exists(graph_dir):
@@ -18,17 +19,21 @@ def get_plotly_figures():
         for file in files:
             if file.endswith(".py") and os.path.basename(root) == settings.GRAPH_DIR_NAME and file != "__init__.py":
                 # Get the relative path (e.g., '2023_10_01_sales\chart')
-                rel_path = os.path.relpath(os.path.join(root, file), graph_dir)
+                rel_path = os.path.relpath(os.path.join(root, file), module_root)
 
                 # Convert file path to python module path (folder.file)
-                module_path = rel_path.replace(os.sep, '.')
-
-                # Prepend the package name
-                full_import_path = f"{settings.CONTENT_MODULE_NAME}.{module_path}"
+                module_path = rel_path.replace(os.sep, '.').replace(".py", "")
 
                 # Human-friendly label (Folder > File)
-                label = module_path.split(".")[0].replace('_', '-').title() + " > " + module_path.split(".")[-1].replace('_', ' ').title()
-                choices.append((full_import_path, label))
+                label = ""
+                module_list = module_path.split(".")
+                for i, module in enumerate(module_list):
+                    if module.startswith("date_"):
+                        label = module.replace("date_", "").replace('_', '-').title()
+                    if i == len(module_list) - 1:
+                        label = label + " > " + module.replace('_', ' ').title()
+
+                choices.append((module_path, label))
 
     return sorted(choices)
 
