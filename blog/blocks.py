@@ -21,7 +21,7 @@ def get_plotly_figures():
                 rel_path = os.path.relpath(os.path.join(root, file), graph_dir)
 
                 # Convert file path to python module path (folder.file)
-                module_path = rel_path.replace(os.sep, '.')[:-3]
+                module_path = rel_path.replace(os.sep, '.')
 
                 # Prepend the package name
                 full_import_path = f"{settings.CONTENT_MODULE_NAME}.{module_path}"
