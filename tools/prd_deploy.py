@@ -47,7 +47,14 @@ def copy_and_overwrite_any(source_path, destination_root):
         print(f"Error: Source '{source}' not found.")
         return
 
+
+
     # --- 1. Handle Case: Source is a FILE ---
+    if dest_root.exists():
+        # rmtree deletes the folder and all its contents
+        shutil.rmtree(dest_root)
+        print(f"Cleared destination directory: {dest_root}")
+
     if source.is_file():
         # Ensure the destination directory exists (e.g., /tmp/upload/.env/)
         dest_root.mkdir(parents=True, exist_ok=True)
@@ -85,6 +92,7 @@ if __name__ == "__main__":
         ('static', ''),  # Goes to ./upload/static
         ('.env/.env.production', '.env'),  # Goes to ./upload/.env/.env.production
         ('.env/.env.base', '.env')  # Goes to ./upload/.env/.env.base
+        ('.env/.env.blog_content', '.env')  # Goes to ./upload/.env/.env.base
     ]
 
     for src, subfolder in items_to_copy:
