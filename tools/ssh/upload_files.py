@@ -36,6 +36,12 @@ def ssh_upload_folder(
     sftp_client = None
     uploaded_files = []
 
+    def remote_rm(client, remote_path):
+        command = f"rm -r {remote_path}"
+        stdin, stdout, stderr = client.exec_command(command)
+        if stdout.channel.recv_exit_status() != 0:
+            raise paramiko.SSHException(f"Failed to clear remote directory {remote_path}: {stderr.read().decode()}")
+
     # Helper function to create remote directory using SSH
     def remote_mkdir_p(client, remote_path):
         """Ensures remote directory exists, similar to mkdir -p."""
@@ -85,6 +91,8 @@ def ssh_upload_folder(
         sftp_client = ssh_client.open_sftp()
 
         # Ensure the remote base folder exists
+        remote_rm(ssh_client, remote_folder)
+        print(f"Cleared remote target folder: {remote_folder}")
         remote_mkdir_p(ssh_client, remote_folder)
         print(f"Ensured remote target folder exists: {remote_folder}")
 
@@ -159,18 +167,20 @@ def ssh_upload_folder(
 # Example usage
 if __name__ == "__main__":
     # Configuration is loaded or mocked here
-    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    dev_config = Config(RepositoryEnv(os.path.join(ROOT_DIR, ENV_DIR, ".env.dev")))
+    config = Config(RepositoryEnv(os.path.join(ROOT_DIR, ENV_DIR, ".env.production")))
 
     # IMPORTANT: Replace these with your actual connection details for a real test
-    local_folder = "./uploads/"
-    remote_folder = "/tmp/upload/"
+    local_folder = f"{ROOT_DIR}/uploads/"
+    remote_folder = "/tmp/uploads/"
 
     result = ssh_upload_folder(
         host=config('EC2_HOSTNAME'),
         username=config('EC2_USER'),
         local_folder=local_folder,
         remote_folder=remote_folder,
-        key_file=config('SSH_KEY_PATH'),
+        key_file=dev_config('SSH_KEY_PATH'),
     )
 
     if result['success']:

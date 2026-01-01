@@ -10,13 +10,6 @@ echo "  Source File: $VENV_FILE"
 echo "  Project Root: $PROJECT_ROOT"
 echo "=========================================="
 
-echo "=========================================="
-echo "Moving uploaded files from /tmp/upload to $PROJECT_ROOT:"
-cp -r -f /tmp/uploads/. "$PROJECT_ROOT/"
-echo "Complete."
-echo "=========================================="
-
-
 
 echo "=========================================="
 echo "Activating virtual environment:"
@@ -40,6 +33,12 @@ pip install -e "$CONTENT_ROOT"
 echo "Complete."
 echo "=========================================="
 
+
+echo "=========================================="
+echo "Moving uploaded files from /tmp/upload to $PROJECT_ROOT:"
+cp -r /tmp/uploads/. "$PROJECT_ROOT/"
+echo "Complete."
+echo "=========================================="
 
 
 echo "=========================================="
