@@ -16,6 +16,7 @@ class BlogConfig(AppConfig):
         # 3. Inject Wagtail's environment into the package
         # This "re-initializes" the settings object, overriding the
         # default local .env that might have been loaded.
+        blog_content.settings.reset()
         blog_content.settings.initialize(
             env_file_path=dotenv_path
         )
