@@ -109,26 +109,26 @@ if __name__ == "__main__":
         ('.env/.env.blog_content', '.env'),  # Goes to ./upload/.env/.env.base
     ]
 
-    # # Remove all files in the target folder
-    # target_root = os.path.join(ROOT_DIR, UPLOAD_DIR)
-    # if os.path.exists(target_root):
-    #     # rmtree deletes the folder and all its contents
-    #     safe_rmtree(target_root)
-    #     print(f"Cleared destination directory: {target_root}")
-    #
-    # for src, subfolder in items_to_copy:
-    #     target_dir = os.path.join(target_root, subfolder)
-    #     src_dir = os.path.join(ROOT_DIR, src)
-    #     copy_and_overwrite_any(src_dir, target_dir)
-    #
-    # # Upload files
-    # ssh_upload_folder(
-    #     host=config('EC2_HOSTNAME'),
-    #     username=config('EC2_USER'),
-    #     local_folder=f'{ROOT_DIR}/uploads/',
-    #     remote_folder='/tmp/uploads/',
-    #     key_file=dev_config('SSH_KEY_PATH'),
-    # )
+    # Remove all files in the target folder
+    target_root = os.path.join(ROOT_DIR, UPLOAD_DIR)
+    if os.path.exists(target_root):
+        # rmtree deletes the folder and all its contents
+        safe_rmtree(target_root)
+        print(f"Cleared destination directory: {target_root}")
+
+    for src, subfolder in items_to_copy:
+        target_dir = os.path.join(target_root, subfolder)
+        src_dir = os.path.join(ROOT_DIR, src)
+        copy_and_overwrite_any(src_dir, target_dir)
+
+    # Upload files
+    ssh_upload_folder(
+        host=config('EC2_HOSTNAME'),
+        username=config('EC2_USER'),
+        local_folder=f'{ROOT_DIR}/uploads/',
+        remote_folder='/tmp/uploads/',
+        key_file=dev_config('SSH_KEY_PATH'),
+    )
 
     # Run build bash script
     bash_script_name = 'prd_deploy.sh'

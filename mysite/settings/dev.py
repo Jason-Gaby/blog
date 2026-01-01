@@ -83,3 +83,5 @@ except ImportError:
 GRAPH_DIR_NAME = config('GRAPH_DIR_NAME')
 GRAPH_DIR = config('GRAPH_ROOT_DIR')
 CONTENT_ROOT_DIR = config('CONTENT_ROOT_DIR')
+
+PROJECT_ROOT = config("PROJECT_ROOT")
