@@ -19,3 +19,5 @@ class BlogConfig(AppConfig):
         blog_content.settings.initialize(
             env_file_path=dotenv_path
         )
+
+        blog_content.set_global_context(blog_content.settings.CONTEXT, blog_content.settings.ROOT_DIR)
