@@ -55,6 +55,9 @@ class PlotlyBlock(blocks.StructBlock):
             if settings.DEBUG:
                 importlib.reload(module)
 
+            # This import is necessary to set themes for figures
+            import blog_content.core.plotly_core.theme
+
             # Run the standardized function
             fig = module.generate_fig()
 
