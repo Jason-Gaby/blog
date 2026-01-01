@@ -17,5 +17,5 @@ class BlogConfig(AppConfig):
         # This "re-initializes" the settings object, overriding the
         # default local .env that might have been loaded.
         blog_content.settings.initialize(
-            dotenv_path
+            env_file_path=dotenv_path
         )

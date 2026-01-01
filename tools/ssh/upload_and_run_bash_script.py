@@ -167,12 +167,10 @@ def ssh_upload_script_execute_and_download(
         stdout_output = "".join(full_stdout)
         stderr_output = "".join(full_stderr)
 
-        print(f"Script exit status: {exit_status}")
-
-        if stdout_output:
-            print(f"STDOUT:\n{stdout_output}")
-        if stderr_output:
-            print(f"STDERR:\n{stderr_output}")
+        # if stdout_output:
+        #     print(f"STDOUT:\n{stdout_output}")
+        # if stderr_output:
+        #     print(f"STDERR:\n{stderr_output}")
 
         # Check if script executed successfully
         if exit_status != 0:
@@ -210,8 +208,6 @@ def ssh_upload_script_execute_and_download(
             sftp_client.get(remote_file_path, local_download_path)
             print(f"✓ File downloaded successfully to {local_download_path}")
 
-        # Get file stats
-        file_stats = sftp_client.stat(remote_file_path)
 
         # Cleanup script if requested
         if cleanup_script:
@@ -228,7 +224,6 @@ def ssh_upload_script_execute_and_download(
             'stderr': stderr_output,
             'remote_file_path': remote_file_path,
             'remote_script_path': remote_script_path,
-            'file_size': file_stats.st_size,
             'script_cleaned_up': cleanup_script
         }
 

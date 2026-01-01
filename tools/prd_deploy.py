@@ -1,26 +1,29 @@
 from decouple import Config, RepositoryEnv
+import subprocess
+import shutil
+import stat
+import time
+import os
+from pathlib import Path
+
 from tools.ssh.upload_and_run_bash_script import ssh_upload_script_execute_and_download
 from tools.ssh.upload_files import ssh_upload_folder
 from definitions import ENV_DIR
 
-import subprocess
-import shutil
-import os
-from pathlib import Path
-
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def run_local_command(command, description):
+def run_local_command(command, description, cwd=None):
     """Runs a shell command locally and checks the exit status."""
     print(f"\n--- Running: {description} ---")
     try:
         # Execute command, capturing output
         result = subprocess.run(
             command,
-            check=True,  # Raise CalledProcessError if return code is non-zero
+            check=True,
             shell=True,
             capture_output=True,
-            text=True
+            text=True,
+            cwd=cwd,
         )
         print("✓ Success.")
         if result.stdout:
@@ -50,11 +53,6 @@ def copy_and_overwrite_any(source_path, destination_root):
 
 
     # --- 1. Handle Case: Source is a FILE ---
-    if dest_root.exists():
-        # rmtree deletes the folder and all its contents
-        shutil.rmtree(dest_root)
-        print(f"Cleared destination directory: {dest_root}")
-
     if source.is_file():
         # Ensure the destination directory exists (e.g., /tmp/upload/.env/)
         dest_root.mkdir(parents=True, exist_ok=True)
@@ -74,39 +72,63 @@ def copy_and_overwrite_any(source_path, destination_root):
         shutil.copytree(source, dest_folder, dirs_exist_ok=True)
         print(f"Copied folder: {source} -> {dest_folder}")
 
+def force_remove_readonly(func, path, excinfo):
+    """
+    Error handler for shutil.rmtree to handle read-only files.
+    """
+    # Clear the read-only bit and retry the removal
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+def safe_rmtree(path):
+    if os.path.exists(path):
+        try:
+            shutil.rmtree(path, onerror=force_remove_readonly)
+        except Exception:
+            # Sometimes Windows needs a moment to release a lock
+            time.sleep(0.5)
+            shutil.rmtree(path, ignore_errors=True)
 
 if __name__ == "__main__":
-    dev_config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.dev")))
-    config = Config(RepositoryEnv(os.path.join(ENV_DIR, ".env.production")))
+    dev_config = Config(RepositoryEnv(os.path.join(ROOT_DIR, ENV_DIR, ".env.dev")))
+    config = Config(RepositoryEnv(os.path.join(ROOT_DIR, ENV_DIR, ".env.production")))
 
     # Collect static files
     collectstatic_cmd = f"python manage.py collectstatic --noinput"
-    run_local_command(collectstatic_cmd, "Django collectstatic")
+    run_local_command(collectstatic_cmd, "Django collectstatic", ROOT_DIR)
 
     # The base folder where you want everything to end up
-    UPLOAD_DIR = "./uploads"
+    UPLOAD_DIR = "uploads"
 
     # List of items to copy
     # We use a tuple (source, relative_dest_subfolder)
     items_to_copy = [
         ('static', ''),  # Goes to ./upload/static
         ('.env/.env.production', '.env'),  # Goes to ./upload/.env/.env.production
-        ('.env/.env.base', '.env')  # Goes to ./upload/.env/.env.base
-        ('.env/.env.blog_content', '.env')  # Goes to ./upload/.env/.env.base
+        ('.env/.env.base', '.env'),  # Goes to ./upload/.env/.env.base
+        ('.env/.env.blog_content', '.env'),  # Goes to ./upload/.env/.env.base
     ]
 
-    for src, subfolder in items_to_copy:
-        target_dir = Path(UPLOAD_DIR) / subfolder
-        copy_and_overwrite_any(src, target_dir)
-
-    # Upload files
-    ssh_upload_folder(
-        host=config('EC2_HOSTNAME'),
-        username=config('EC2_USER'),
-        local_folder=f'{ROOT_DIR}/uploads/',
-        remote_folder='/tmp/uploads/',
-        key_file=dev_config('SSH_KEY_PATH'),
-    )
+    # # Remove all files in the target folder
+    # target_root = os.path.join(ROOT_DIR, UPLOAD_DIR)
+    # if os.path.exists(target_root):
+    #     # rmtree deletes the folder and all its contents
+    #     safe_rmtree(target_root)
+    #     print(f"Cleared destination directory: {target_root}")
+    #
+    # for src, subfolder in items_to_copy:
+    #     target_dir = os.path.join(target_root, subfolder)
+    #     src_dir = os.path.join(ROOT_DIR, src)
+    #     copy_and_overwrite_any(src_dir, target_dir)
+    #
+    # # Upload files
+    # ssh_upload_folder(
+    #     host=config('EC2_HOSTNAME'),
+    #     username=config('EC2_USER'),
+    #     local_folder=f'{ROOT_DIR}/uploads/',
+    #     remote_folder='/tmp/uploads/',
+    #     key_file=dev_config('SSH_KEY_PATH'),
+    # )
 
     # Run build bash script
     bash_script_name = 'prd_deploy.sh'
@@ -132,8 +154,6 @@ if __name__ == "__main__":
         print(f"\n{'=' * 50}")
         print(f"✓ SUCCESS!")
         print(f"{'=' * 50}")
-        print(f"Local file: {result['local_file_path']}")
-        print(f"File size: {result['file_size']} bytes")
         print(f"Script cleaned up: {result['script_cleaned_up']}")
     else:
         print(f"\n{'=' * 50}")
