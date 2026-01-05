@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "django_recaptcha",
     "django_comments_xtd",
     "django_comments",
+    "plausible.contrib.wagtail",
 ]
 
 MIDDLEWARE = [

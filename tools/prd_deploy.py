@@ -1,3 +1,4 @@
+import argparse
 from decouple import Config, RepositoryEnv
 import subprocess
 import shutil
@@ -90,75 +91,88 @@ def safe_rmtree(path):
             shutil.rmtree(path, ignore_errors=True)
 
 if __name__ == "__main__":
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Wagtail Production Deploy Tool")
+
+    # Flags to SKIP parts of the process
+    parser.add_argument('--skip-static', action='store_true', help="Skip Django collectstatic")
+    parser.add_argument('--skip-upload', action='store_true', help="Skip SSH folder upload")
+    parser.add_argument('--skip-script', action='store_true', help="Skip remote bash script execution")
+    args = parser.parse_args()
+
+    # Initialize config files
     dev_config = Config(RepositoryEnv(os.path.join(ROOT_DIR, ENV_DIR, ".env.dev")))
     config = Config(RepositoryEnv(os.path.join(ROOT_DIR, ENV_DIR, ".env.production")))
 
     # Collect static files
-    collectstatic_cmd = f"python manage.py collectstatic --noinput"
-    run_local_command(collectstatic_cmd, "Django collectstatic", ROOT_DIR)
+    if not args.skip_static:
+        collectstatic_cmd = f"python manage.py collectstatic --noinput"
+        run_local_command(collectstatic_cmd, "Django collectstatic", ROOT_DIR)
 
-    # The base folder where you want everything to end up
-    UPLOAD_DIR = "uploads"
+    if not args.skip_upload:
+        # The base folder where you want everything to end up
+        UPLOAD_DIR = "uploads"
 
-    # List of items to copy
-    # We use a tuple (source, relative_dest_subfolder)
-    items_to_copy = [
-        ('static', ''),  # Goes to ./upload/static
-        ('.env/.env.production', '.env'),  # Goes to ./upload/.env/.env.production
-        ('.env/.env.base', '.env'),  # Goes to ./upload/.env/.env.base
-        ('.env/.env.blog_content', '.env'),  # Goes to ./upload/.env/.env.base
-    ]
+        # List of items to copy
+        # We use a tuple (source, relative_dest_subfolder)
+        items_to_copy = [
+            ('static', ''),  # Goes to ./upload/static
+            ('.env/.env.production', '.env'),  # Goes to ./upload/.env/.env.production
+            ('.env/.env.base', '.env'),  # Goes to ./upload/.env/.env.base
+            ('.env/.env.blog_content', '.env'),  # Goes to ./upload/.env/.env.base
+        ]
 
-    # Remove all files in the target folder
-    target_root = os.path.join(ROOT_DIR, UPLOAD_DIR)
-    if os.path.exists(target_root):
-        # rmtree deletes the folder and all its contents
-        safe_rmtree(target_root)
-        print(f"Cleared destination directory: {target_root}")
+        # Remove all files in the target folder
+        target_root = os.path.join(ROOT_DIR, UPLOAD_DIR)
+        if os.path.exists(target_root):
+            # rmtree deletes the folder and all its contents
+            safe_rmtree(target_root)
+            print(f"Cleared destination directory: {target_root}")
 
-    for src, subfolder in items_to_copy:
-        target_dir = os.path.join(target_root, subfolder)
-        src_dir = os.path.join(ROOT_DIR, src)
-        copy_and_overwrite_any(src_dir, target_dir)
+        for src, subfolder in items_to_copy:
+            target_dir = os.path.join(target_root, subfolder)
+            src_dir = os.path.join(ROOT_DIR, src)
+            copy_and_overwrite_any(src_dir, target_dir)
 
-    # Upload files
-    ssh_upload_folder(
-        host=config('EC2_HOSTNAME'),
-        username=config('EC2_USER'),
-        local_folder=f'{ROOT_DIR}/uploads/',
-        remote_folder='/tmp/uploads/',
-        key_file=dev_config('SSH_KEY_PATH'),
-    )
+        # Upload files
+        ssh_upload_folder(
+            host=config('EC2_HOSTNAME'),
+            username=config('EC2_USER'),
+            local_folder=f'{ROOT_DIR}/uploads/',
+            remote_folder='/tmp/uploads/',
+            key_file=dev_config('SSH_KEY_PATH'),
+        )
 
-    # Run build bash script
-    bash_script_name = 'prd_deploy.sh'
-    host = config('EC2_HOSTNAME'),
-    username = config('EC2_USER'),
-    local_script_path = f'{ROOT_DIR}/tools/bash/{bash_script_name}',
-    key_file = dev_config('SSH_KEY_PATH'),
+    if not args.skip_script:
+        # Run build bash script
+        bash_script_name = 'prd_deploy.sh'
+        host = config('EC2_HOSTNAME'),
+        username = config('EC2_USER'),
+        local_script_path = f'{ROOT_DIR}/tools/bash/{bash_script_name}',
+        key_file = dev_config('SSH_KEY_PATH'),
 
-    venv_path = config('VENV_PATH')
-    project_root = config('PROJECT_ROOT')
-    content_root = config('CONTENT_ROOT_DIR')
-    script_args = f'{venv_path} {project_root} {content_root}'
+        venv_path = config('VENV_PATH')
+        project_root = config('PROJECT_ROOT')
+        content_root = config('CONTENT_ROOT_DIR')
+        script_args = f'{venv_path} {project_root} {content_root}'
 
-    result = ssh_upload_script_execute_and_download(
-        host=config('EC2_HOSTNAME'),
-        username=config('EC2_USER'),
-        local_script_path=f'{ROOT_DIR}/tools/bash/{bash_script_name}',
-        key_file=dev_config('SSH_KEY_PATH'),
-        script_args=script_args,
-    )
+        result = ssh_upload_script_execute_and_download(
+            host=config('EC2_HOSTNAME'),
+            username=config('EC2_USER'),
+            local_script_path=f'{ROOT_DIR}/tools/bash/{bash_script_name}',
+            key_file=dev_config('SSH_KEY_PATH'),
+            script_args=script_args,
+        )
 
-    if result['success']:
-        print(f"\n{'=' * 50}")
-        print(f"✓ SUCCESS!")
-        print(f"{'=' * 50}")
-        print(f"Script cleaned up: {result['script_cleaned_up']}")
-    else:
-        print(f"\n{'=' * 50}")
-        print(f"✗ FAILED!")
-        print(f"{'=' * 50}")
-        print(f"Error: {result['error']}")
-        if 'stderr' in result:
-            print(f"Error output:\n{result['stderr']}")
+        if result['success']:
+            print(f"\n{'=' * 50}")
+            print(f"✓ SUCCESS!")
+            print(f"{'=' * 50}")
+            print(f"Script cleaned up: {result['script_cleaned_up']}")
+        else:
+            print(f"\n{'=' * 50}")
+            print(f"✗ FAILED!")
+            print(f"{'=' * 50}")
+            print(f"Error: {result['error']}")
+            if 'stderr' in result:
+                print(f"Error output:\n{result['stderr']}")
