@@ -38,8 +38,8 @@
 
 <section>
     <div class="container mx-auto flex md:px-24 md:py-10 flex-col items-center">
-        <div class="richtext-content">
-            {{ page.body| safe }}
+        <div class="prose">
+            {{ page.body| richtext }}
         </div>
     </div>
 </section>

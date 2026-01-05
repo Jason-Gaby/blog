@@ -67,8 +67,20 @@
                         </div>
                     </div>
                     <hr>
-                    <div class="my-8">
-                        {{ page.body }}
+                    <div class="prose my-8">
+                        <div class="prose max-w-none my-8">
+                            {% for block in page.body %}
+                                <div class="block-{{ block.block_type }} mb-6">
+                                    {% if block.block_type == 'text' %}
+                                        {# The filter MUST be here for headers/lists to work #}
+                                        {{ block.value|richtext }}
+                                    {% else %}
+                                        {# Chart and Dash blocks render their own HTML #}
+                                        {{ block }}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
                     </div>
                     <hr>
 
@@ -97,7 +109,7 @@
                     {% get_comment_count for page as comment_count %}
                     <div class="py-4 text-center">
                         {#                        <a href="{% url 'blog:post-list' %}">Back to the post list</a>#}
-{#                        &nbsp;&sdot;&nbsp;#}
+                        {#                        &nbsp;&sdot;&nbsp;#}
                         {{ comment_count }} comment{{ comment_count|pluralize }}
                         ha{{ comment_count|pluralize:"s,ve" }} been posted.
                     </div>
@@ -105,7 +117,8 @@
 
                     {% if page.allow_comments %}
                         <div class="mb-4 p-6 space-y-4">
-                            <div class="bg-white dark:bg-gray-500 flex flex-col items-center justify-center rounded-lg shadow-mdn p-6" id="top-level-comment-form-container">
+                            <div class="bg-white dark:bg-gray-500 flex flex-col items-center justify-center rounded-lg shadow-mdn p-6"
+                                 id="top-level-comment-form-container">
                                 {% if user.is_authenticated %}
                                     <h4 class="text-xl font-bold mb-2 text-center pb-3">Post your comment</h4>
                                     {% get_comment_form for page as form %}
@@ -120,7 +133,7 @@
                         {% if comment_count %}
                             <hr/>
                             <div class="comments sm:px-12 px-4 py-6">
-{#                                {% include 'comments/comment_tree.html' %}#}
+                                {#                                {% include 'comments/comment_tree.html' %}#}
                                 {% render_xtdcomment_tree for page allow_flagging allow_feedback using comments/comment_tree.html %}
                             </div>
                         {% endif %}
