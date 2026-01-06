@@ -5,7 +5,6 @@ from storages.backends.s3boto3 import S3Boto3Storage, S3ManifestStaticStorage
 class StaticStorage(S3ManifestStaticStorage):
     bucket_name = settings.AWS_STATIC_STORAGE_BUCKET_NAME
     location = 'static'
-    default_acl = 'public-read'
 
     # This overrides the global for static files
     def get_object_parameters(self, name):
