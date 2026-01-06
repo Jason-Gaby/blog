@@ -1,17 +1,14 @@
-
-
-from blog.badwords.blacklist import badwords
+import math
+import re
 
 from django import forms
-from django.conf import settings
-from django.shortcuts import reverse
 from django.utils import timezone
+from django.utils.html import strip_tags
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 
 from django_comments_xtd.moderation import moderator, SpamModerator
 from django_comments_xtd.models import Comment
-
 
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.contrib.taggit import ClusterTaggableManager
@@ -61,7 +58,13 @@ class BlogIndexPage(Page):
     def get_context(self, request):
         # Update context to include only published posts, ordered by reverse-chron
         context = super().get_context(request)
-        blogpages = self.get_children().live().order_by('-first_published_at')
+
+        blogpages = self.get_children()
+
+        if not request.user.is_staff:
+            blogpages = blogpages.live()
+
+        blogpages = blogpages.order_by('-first_published_at')
         context['blogpages'] = blogpages
         return context
 
@@ -125,6 +128,34 @@ class BlogPage(Page):
         ).select_related('user')  # <-- This fetches the User data efficiently
 
         return comment_list
+
+    @property
+    def word_count(self):
+        """
+        Calculates the word count of the StreamField body.
+        """
+        total_words = 0
+
+        # strip_tags removes HTML; we convert the StreamField to a string first
+        for block in self.body:
+            if block.block_type == 'text':
+                raw_html = str(block.value)
+                html_with_spaces = re.sub(r'<[^>]+>', ' ', raw_html)
+
+                clean_text = strip_tags(html_with_spaces)
+                total_words += len(clean_text.split())
+
+        return total_words
+
+    @property
+    def read_time(self):
+        """
+        Calculates estimated read time in minutes.
+        """
+        words_per_minute = 200
+        minutes = self.word_count / words_per_minute
+        # Always round up to at least 1 minute
+        return math.ceil(minutes)
 
 
 class BlogPageGalleryImage(Orderable):
