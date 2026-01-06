@@ -91,8 +91,13 @@ def ssh_upload_folder(
         sftp_client = ssh_client.open_sftp()
 
         # Ensure the remote base folder exists
-        remote_rm(ssh_client, remote_folder)
-        print(f"Cleared remote target folder: {remote_folder}")
+        try:
+            remote_rm(ssh_client, remote_folder)
+            print(f"Cleared remote target folder: {remote_folder}")
+        except paramiko.SSHException as e:
+            print(f"Unable to delete folder {remote_folder}. Received error: {e}")
+            print("Skipping folder cleanup.")
+
         remote_mkdir_p(ssh_client, remote_folder)
         print(f"Ensured remote target folder exists: {remote_folder}")
 
