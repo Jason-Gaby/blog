@@ -44,7 +44,7 @@ echo "=========================================="
 echo "=========================================="
 echo "Update Django migrations and static files:"
 python manage.py migrate
-python manage.py collectstatic --noinput
+python manage.py collectstatic --noinput --ignore css/input.css # Must ignore the input.css to not cause Django to crash.
 echo "Complete."
 echo "=========================================="
 

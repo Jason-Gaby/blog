@@ -4,6 +4,7 @@ from storages.backends.s3boto3 import S3Boto3Storage, S3ManifestStaticStorage
 
 class StaticStorage(S3ManifestStaticStorage):
     bucket_name = settings.AWS_STATIC_STORAGE_BUCKET_NAME
+    manifest_strict = False # Stops Django from crashing whole build if it can't find a CSS file.
     location = 'static'
 
     # This overrides the global for static files
