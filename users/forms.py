@@ -130,6 +130,7 @@ class SubscribeForm(forms.Form):
         required=True,
         widget=forms.EmailInput(attrs={'placeholder': 'Enter your email'})
     )
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
 
 
 

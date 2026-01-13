@@ -220,14 +220,14 @@ def subscribe_view(request):
 
                 except IntegrityError as e:
                     # Should only catch if the generated username was somehow not unique, though highly unlikely.
-                    messages.error(request, "A user already exists with that information. Please try again.")
+                    messages.error(request, "Error: A user already exists with that information. Please try again.")
                     return redirect(url)
                 except Exception as e:
-                    messages.error(request, f"An unexpected error occurred during signup: {e}")
+                    messages.error(request, f"An error occurred during signup: {e}")
                     return redirect(url)
 
         else:
-            messages.error(request, "The email address provided is invalid.")
+            messages.error(request, "Error: The email address provided is invalid or CAPTCHA failed. Please try again.")
             return redirect(url)
 
     # Handle GET Requests
