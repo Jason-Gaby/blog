@@ -98,6 +98,7 @@ if __name__ == "__main__":
     parser.add_argument('--skip-static', action='store_true', help="Skip Django collectstatic")
     parser.add_argument('--skip-upload', action='store_true', help="Skip SSH folder upload")
     parser.add_argument('--skip-script', action='store_true', help="Skip remote bash script execution")
+    parser.add_argument('--git-only', action='store_true', help="Run only a remote git pull.")
     args = parser.parse_args()
 
     # Initialize config files
@@ -105,11 +106,11 @@ if __name__ == "__main__":
     config = Config(RepositoryEnv(os.path.join(ROOT_DIR, ENV_DIR, ".env.production")))
 
     # Collect static files
-    if not args.skip_static:
+    if not args.skip_static and not args.git_only:
         collectstatic_cmd = f"python manage.py collectstatic --noinput"
         run_local_command(collectstatic_cmd, "Django collectstatic", ROOT_DIR)
 
-    if not args.skip_upload:
+    if not args.skip_upload and not args.git_only:
         # The base folder where you want everything to end up
         UPLOAD_DIR = "uploads"
 
@@ -146,6 +147,10 @@ if __name__ == "__main__":
     if not args.skip_script:
         # Run build bash script
         bash_script_name = 'prd_deploy.sh'
+
+        if args.git_only:
+            bash_script_name = 'git_pull.sh'
+
         host = config('EC2_HOSTNAME'),
         username = config('EC2_USER'),
         local_script_path = f'{ROOT_DIR}/tools/bash/{bash_script_name}',
